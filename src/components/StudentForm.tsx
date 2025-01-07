@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
 
-interface StudentForm {
+interface StudentFormData {
   firstName: string;
   lastName: string;
   phone: string;
   address: string;
 }
 
-export default function StudentForm() {
-  const [formData, setFormData] = useState<StudentForm>({
+interface StudentFormProps {
+  onSubmit: (data: StudentFormData) => void;
+}
+
+const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
+  const [formData, setFormData] = useState<StudentFormData>({
     firstName: '',
     lastName: '',
     phone: '',
-    address: ''
+    address: '',
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({
@@ -22,7 +26,7 @@ export default function StudentForm() {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const validate = () => {
@@ -30,22 +34,20 @@ export default function StudentForm() {
     let isValid = true;
 
     if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required.';
+      newErrors.firstName = 'Nome completo é obrigatório.';
       isValid = false;
     }
 
     if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required.';
+      newErrors.phone = 'Turma é obrigatória.';
       isValid = false;
     }
 
-    /*
     if (!formData.address.trim()) {
-      newErrors.address = 'Address is required.';
+      newErrors.address = 'Observações são obrigatórias.';
       isValid = false;
     }
-    */
-    
+
     setErrors(newErrors);
     return isValid;
   };
@@ -53,8 +55,7 @@ export default function StudentForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
-      console.log('Form data:', formData);
-      // Submit form logic here
+      onSubmit(formData); // Call the parent onSubmit callback with formData
     }
   };
 
@@ -66,14 +67,14 @@ export default function StudentForm() {
             <form
               onSubmit={handleSubmit}
               className="card p-4 shadow-lg bg-white bg-opacity-75"
-              autoComplete="on" // Enable autofill for form fields
+              autoComplete="on"
             >
-              <h3 className="text-center mb-4">Informações do aluno</h3>
+              <h3 className="text-center mb-4">Informações do Aluno</h3>
 
               <div className="row mb-3">
                 <div className="col-md-6">
                   <label htmlFor="firstName" className="form-label">
-                    Nome completo
+                    Nome Completo
                   </label>
                   <input
                     type="text"
@@ -82,8 +83,8 @@ export default function StudentForm() {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
-                    placeholder="Enter your full name"
-                    autoComplete="given-name" // Enable autofill for first name
+                    placeholder="Digite o nome completo"
+                    autoComplete="given-name"
                   />
                   {errors.firstName && <div className="invalid-feedback">{errors.firstName}</div>}
                 </div>
@@ -100,8 +101,8 @@ export default function StudentForm() {
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder="Enter your phone number"
-                  autoComplete="tel" // Enable autofill for phone number
+                  placeholder="Digite a turma"
+                  autoComplete="tel"
                 />
                 {errors.phone && <div className="invalid-feedback">{errors.phone}</div>}
               </div>
@@ -116,15 +117,15 @@ export default function StudentForm() {
                   name="address"
                   value={formData.address}
                   onChange={handleChange}
-                  placeholder="Enter your address"
+                  placeholder="Digite as observações"
                   rows={3}
-                  autoComplete="address-line1" // Enable autofill for address line 1
+                  autoComplete="address-line1"
                 />
                 {errors.address && <div className="invalid-feedback">{errors.address}</div>}
               </div>
 
               <button type="submit" className="btn btn-secondary btn-lg w-100">
-                Submit
+                Enviar
               </button>
             </form>
           </div>
@@ -132,4 +133,6 @@ export default function StudentForm() {
       </div>
     </div>
   );
-}
+};
+
+export default StudentForm;
