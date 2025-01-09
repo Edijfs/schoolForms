@@ -6,7 +6,7 @@ interface Extra {
 }
 
 const extras: Extra[] = [
-  { name: 'Extra Warranty', description: 'Extended warranty for an additional year.' },
+  { name: 'Foto 15x20', description: '' },
   { name: 'Gift Wrap', description: 'Gift wrapping for your order.' },
   { name: 'Priority Shipping', description: 'Expedited shipping for faster delivery.' },
   { name: 'Customization', description: 'Custom design tailored to your needs.' },
