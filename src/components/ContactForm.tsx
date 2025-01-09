@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 // List of school (for autocomplete)
 const school = [
-  "IDJV","CLPC","S","CM"
+  "IDJV","CLPC","SA","CM","Colegio aguas ferreas"
 ];
 
 interface FormData {
