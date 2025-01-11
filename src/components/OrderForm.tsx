@@ -1,4 +1,6 @@
+// OrderForm.tsx
 import React, { useState } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface Product {
   id: string;
@@ -54,15 +56,13 @@ const OrderForm: React.FC = () => {
       const newPacks = new Map(prev);
 
       if (packId === 'Only extras') {
-        // Show modal when "Only Extras" is selected
         setShowModal(true);
         newPacks.clear();
         newPacks.set(packId, 1);
       } else {
-        // Remove "Only Extras" if another pack is selected
         newPacks.delete('Only extras');
         if (newPacks.has(packId)) {
-          newPacks.delete(packId); // Toggle pack selection
+          newPacks.delete(packId);
         } else {
           newPacks.set(packId, 1);
         }
@@ -76,7 +76,7 @@ const OrderForm: React.FC = () => {
     setSelectedPacks((prev) => {
       const newPacks = new Map(prev);
       if (newPacks.has(packId)) {
-        newPacks.set(packId, quantity);
+        newPacks.set(packId, Math.max(1, quantity));
       }
       return newPacks;
     });
@@ -98,7 +98,7 @@ const OrderForm: React.FC = () => {
     setSelectedExtras((prev) => {
       const newExtras = new Map(prev);
       if (newExtras.has(extra)) {
-        newExtras.set(extra, quantity);
+        newExtras.set(extra, Math.max(1, quantity));
       }
       return newExtras;
     });
@@ -107,7 +107,6 @@ const OrderForm: React.FC = () => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    // Validate "Only Extras" selection
     if (selectedPacks.has('Only extras') && selectedExtras.size < 3) {
       alert('Please select at least 3 extras when choosing "Only Extras".');
       return;
@@ -126,108 +125,107 @@ const OrderForm: React.FC = () => {
   return (
     <div className="min-vh-100 bg-light d-flex align-items-center py-4">
       <div className="container">
-        <form onSubmit={handleSubmit} className="card p-4 shadow-sm">
-          <h3 className="text-center mb-4">Order Form</h3>
+        <form onSubmit={handleSubmit} className="card shadow-sm">
+          <div className="card-body p-4">
+            <h3 className="card-title text-center mb-4">Order Form</h3>
 
-          {/* Pack Options */}
-          <div className="mb-4">
-            <h5>Select Packs</h5>
-            <div className="d-flex gap-3">
-              {products.map((p) => (
-                <div
-                  key={p.id}
-                  onClick={() => handlePackClick(p.id)}
-                  className={`card text-center p-3 ${
-                    selectedPacks.has(p.id) ? 'border-primary' : 'border-light'
-                  }`}
-                  style={{
-                    cursor: 'pointer',
-                    flex: 1,
-                    boxShadow: selectedPacks.has(p.id) ? '0 0 10px rgba(0, 123, 255, 0.5)' : 'none',
-                  }}
-                >
-                  <h6>{p.name}</h6>
-                  <p style={{ fontSize: '0.875rem' }}>{p.description}</p>
+            {/* Pack Options */}
+            <div className="mb-4">
+              <h5 className="mb-3">Select Packs</h5>
+              <div className="row g-3">
+                {products.map((p) => (
+                  <div className="col-md-4" key={p.id}>
+                    <div
+                      onClick={() => handlePackClick(p.id)}
+                      className={`card h-100 ${
+                        selectedPacks.has(p.id) ? 'border-primary' : ''
+                      }`}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className="card-body text-center">
+                        <h6 className="card-title">{p.name}</h6>
+                        <p className="card-text small text-muted">{p.description}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Pack Quantities */}
+            {Array.from(selectedPacks.entries()).map(([packId, qty]) =>
+              packId !== 'Only extras' ? (
+                <div className="mb-3" key={packId}>
+                  <label className="form-label">{packId} Quantity</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={qty}
+                    min="1"
+                    onChange={(e) => handlePackQuantityChange(packId, parseInt(e.target.value))}
+                  />
+                </div>
+              ) : null
+            )}
+
+            {/* Extras Options */}
+            <div className="mb-4">
+              <h5 className="mb-3">Select Extras</h5>
+              <div className="row g-3">
+                {products.flatMap((p) =>
+                  p.extraImages.map((img, index) => (
+                    <div className="col-md-4" key={`${p.id}-${index}`}>
+                      <div
+                        onClick={() => handleExtraClick(img.extra)}
+                        className={`card h-100 ${
+                          selectedExtras.has(img.extra) ? 'border-primary' : ''
+                        }`}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div className="card-body text-center">
+                          <div
+                            className={`mb-3 rounded ${
+                              selectedExtras.has(img.extra) ? 'bg-primary' : 'bg-secondary'
+                            }`}
+                            style={{ height: '80px' }}
+                          ></div>
+                          <h6 className="card-title">{img.extra}</h6>
+                          <p className="card-text small text-muted">{img.description}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Extra Quantities */}
+              {Array.from(selectedExtras.entries()).map(([extra, qty]) => (
+                <div className="mt-3" key={extra}>
+                  <div className="d-flex align-items-center justify-content-between">
+                    <label className="form-label mb-0">{extra}</label>
+                    <input
+                      type="number"
+                      className="form-control ms-3"
+                      style={{ width: '100px' }}
+                      value={qty}
+                      min="1"
+                      onChange={(e) => handleExtraQuantityChange(extra, parseInt(e.target.value))}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
+
+            <button type="submit" className="btn btn-primary w-100">
+              Submit Order
+            </button>
           </div>
-
-          {/* Pack Quantities */}
-          {Array.from(selectedPacks.entries()).map(([packId, qty]) =>
-            packId !== 'Only extras' ? (
-              <div className="mb-3" key={packId}>
-                <h6>{packId} Quantity</h6>
-                <input
-                  type="number"
-                  className="form-control"
-                  value={qty}
-                  min="1"
-                  onChange={(e) => handlePackQuantityChange(packId, Math.max(1, Number(e.target.value)))}
-                />
-              </div>
-            ) : null
-          )}
-
-          {/* Extras Options */}
-          <div className="mb-4">
-            <h5>Select Extras</h5>
-            <div className="row">
-              {products.flatMap((p) =>
-                p.extraImages.map((img, index) => (
-                  <div
-                    key={`${p.id}-${index}`}
-                    className="col-6 col-md-4"
-                    onClick={() => handleExtraClick(img.extra)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div
-                      className={`p-3 text-center border rounded ${
-                        selectedExtras.has(img.extra) ? 'border-primary' : 'border-secondary'
-                      }`}
-                    >
-                      <div
-                        style={{
-                          width: '100%',
-                          height: '80px',
-                          backgroundColor: selectedExtras.has(img.extra) ? '#007bff' : '#ddd',
-                          borderRadius: '5px',
-                          marginBottom: '10px',
-                        }}
-                      ></div>
-                      <h6 style={{ fontSize: '0.875rem' }}>{img.extra}</h6>
-                      <p style={{ fontSize: '0.75rem' }}>{img.description}</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Extra Quantities */}
-            {Array.from(selectedExtras.entries()).map(([extra, qty]) => (
-              <div className="d-flex justify-content-between align-items-center mb-2" key={extra}>
-                <span>{extra}</span>
-                <input
-                  type="number"
-                  className="form-control w-25"
-                  value={qty}
-                  min="1"
-                  onChange={(e) => handleExtraQuantityChange(extra, Math.max(1, Number(e.target.value)))}
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* Submit Button */}
-          <button type="submit" className="btn btn-primary w-100">
-            Submit
-          </button>
         </form>
       </div>
 
-      {/* Modal Popup */}
+      {/* Modal */}
       {showModal && (
-        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
@@ -236,10 +234,13 @@ const OrderForm: React.FC = () => {
                   type="button"
                   className="btn-close"
                   onClick={() => setShowModal(false)}
+                  aria-label="Close"
                 ></button>
               </div>
               <div className="modal-body">
-                <p>At least 3 extras are required for submission when "Only Extras" is selected.</p>
+                <p className="mb-0">
+                  At least 3 extras are required for submission when "Only Extras" is selected.
+                </p>
               </div>
               <div className="modal-footer">
                 <button
