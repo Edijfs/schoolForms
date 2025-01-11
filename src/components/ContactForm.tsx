@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 
 interface ContactFormProps {
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: any) => void;
 }
 
 const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
@@ -28,7 +28,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
   return (
     <div className="container">
       <form onSubmit={handleSubmit} className="card p-4 shadow-sm">
-        <h3 className="text-center mb-4">Contact Information</h3>
+        <h3 className="text-center mb-4">Informação de contacto</h3>
         
         <div className="mb-3">
           <label htmlFor="name" className="form-label">Name</label>

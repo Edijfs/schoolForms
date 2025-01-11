@@ -1,4 +1,3 @@
-/*
 
 import { useState } from 'react';
 import ContactForm from './components/ContactForm';
@@ -11,18 +10,18 @@ export default function App() {
   return (
     <>
       {currentForm === 'contact' && (
-        <ContactForm onSubmit={() => setCurrentForm('student')} />
+        <ContactForm onSubmit={async () => setCurrentForm('student')} />
       )}
       {currentForm === 'student' && (
-        <StudentForm onSubmit={() => setCurrentForm('order')} />
+        <StudentForm onSubmit={async() => setCurrentForm('order')} />
       )}
       {currentForm === 'order' && <OrderForm />}
     </>
   );
 }
 
-*/
 
+/*
 import { useState } from 'react';
 import OrderForm from './components/OrderForm';
 
@@ -34,3 +33,4 @@ export default function App() {
   );
 }
 
+*/
