@@ -68,6 +68,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
                     value={formData.firstName}
                     onChange={handleChange}
                     placeholder="Digite o nome completo"
+                    autoComplete="given-name"
                   />
                   {errors.firstName && (
                     <div className="invalid-feedback">{errors.firstName}</div>
@@ -86,6 +87,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="Digite a turma"
+                    autoComplete="off"
                   />
                   {errors.phone && (
                     <div className="invalid-feedback">{errors.phone}</div>
@@ -104,6 +106,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
                     onChange={handleChange}
                     placeholder="Digite as observações"
                     rows={3}
+                    autoComplete="off"
                   />
                   {errors.address && (
                     <div className="invalid-feedback">{errors.address}</div>

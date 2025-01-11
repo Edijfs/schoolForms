@@ -43,6 +43,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
                     value={formData.name}
                     onChange={handleChange}
                     required
+                    autoComplete="name"
                   />
                 </div>
 
@@ -56,6 +57,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
                     value={formData.email}
                     onChange={handleChange}
                     required
+                    autoComplete="email"
                   />
                 </div>
 
@@ -69,6 +71,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
                     value={formData.phone}
                     onChange={handleChange}
                     required
+                    autoComplete="tel"
                   />
                 </div>
 

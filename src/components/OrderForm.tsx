@@ -1,4 +1,3 @@
-// OrderForm.tsx
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -132,7 +131,7 @@ const OrderForm: React.FC = () => {
             {/* Pack Options */}
             <div className="mb-4">
               <h5 className="mb-3">Select Packs</h5>
-              <div className="row g-3">
+              <div className="row g-3" role="group" aria-label="Pack selection">
                 {products.map((p) => (
                   <div className="col-md-4" key={p.id}>
                     <div
@@ -141,6 +140,9 @@ const OrderForm: React.FC = () => {
                         selectedPacks.has(p.id) ? 'border-primary' : ''
                       }`}
                       style={{ cursor: 'pointer' }}
+                      role="button"
+                      aria-pressed={selectedPacks.has(p.id)}
+                      tabIndex={0}
                     >
                       <div className="card-body text-center">
                         <h6 className="card-title">{p.name}</h6>
@@ -156,13 +158,18 @@ const OrderForm: React.FC = () => {
             {Array.from(selectedPacks.entries()).map(([packId, qty]) =>
               packId !== 'Only extras' ? (
                 <div className="mb-3" key={packId}>
-                  <label className="form-label">{packId} Quantity</label>
+                  <label htmlFor={`qty-${packId}`} className="form-label">
+                    {packId} Quantity
+                  </label>
                   <input
                     type="number"
                     className="form-control"
+                    id={`qty-${packId}`}
+                    name={`qty-${packId}`}
                     value={qty}
                     min="1"
                     onChange={(e) => handlePackQuantityChange(packId, parseInt(e.target.value))}
+                    autoComplete="off"
                   />
                 </div>
               ) : null
@@ -171,7 +178,7 @@ const OrderForm: React.FC = () => {
             {/* Extras Options */}
             <div className="mb-4">
               <h5 className="mb-3">Select Extras</h5>
-              <div className="row g-3">
+              <div className="row g-3" role="group" aria-label="Extra options">
                 {products.flatMap((p) =>
                   p.extraImages.map((img, index) => (
                     <div className="col-md-4" key={`${p.id}-${index}`}>
@@ -181,6 +188,9 @@ const OrderForm: React.FC = () => {
                           selectedExtras.has(img.extra) ? 'border-primary' : ''
                         }`}
                         style={{ cursor: 'pointer' }}
+                        role="button"
+                        aria-pressed={selectedExtras.has(img.extra)}
+                        tabIndex={0}
                       >
                         <div className="card-body text-center">
                           <div
@@ -202,14 +212,19 @@ const OrderForm: React.FC = () => {
               {Array.from(selectedExtras.entries()).map(([extra, qty]) => (
                 <div className="mt-3" key={extra}>
                   <div className="d-flex align-items-center justify-content-between">
-                    <label className="form-label mb-0">{extra}</label>
+                    <label htmlFor={`extra-qty-${extra}`} className="form-label mb-0">
+                      {extra}
+                    </label>
                     <input
                       type="number"
                       className="form-control ms-3"
                       style={{ width: '100px' }}
+                      id={`extra-qty-${extra}`}
+                      name={`extra-qty-${extra}`}
                       value={qty}
                       min="1"
                       onChange={(e) => handleExtraQuantityChange(extra, parseInt(e.target.value))}
+                      autoComplete="off"
                     />
                   </div>
                 </div>
@@ -225,11 +240,17 @@ const OrderForm: React.FC = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div 
+          className="modal show d-block" 
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modalTitle"
+        >
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Important Information</h5>
+                <h5 className="modal-title" id="modalTitle">Important Information</h5>
                 <button
                   type="button"
                   className="btn-close"
