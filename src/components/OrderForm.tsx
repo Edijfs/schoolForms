@@ -1,4 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+interface OrderFormProps {
+  onSubmit: (data: any) => Promise<void>;
+}
 
 interface Extra {
   name: string;
@@ -19,24 +23,29 @@ const packs = [
   { id: 'Pack 2', description: 'Advanced pack with more features.' },
 ];
 
-const OrderForm: React.FC = () => {
+const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
   const [selectedPacks, setSelectedPacks] = useState<Map<string, number>>(new Map());
   const [selectedExtras, setSelectedExtras] = useState<Map<string, number>>(new Map());
   const [totalCost, setTotalCost] = useState<number>(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const calculateTotalCost = () => {
-    const packCost = Array.from(selectedPacks.values()).reduce((sum, qty) => sum + qty * 50, 0); // Assuming each pack is $50
-    const extraCost = Array.from(selectedExtras.values()).reduce((sum, qty) => sum + qty * 10, 0); // Assuming each extra is $10
+    const packCost = Array.from(selectedPacks.values()).reduce((sum, qty) => sum + qty * 50, 0);
+    const extraCost = Array.from(selectedExtras.values()).reduce((sum, qty) => sum + qty * 10, 0);
     setTotalCost(packCost + extraCost);
   };
+
+  useEffect(() => {
+    calculateTotalCost();
+  }, [selectedPacks, selectedExtras]);
 
   const handlePackClick = (packId: string) => {
     setSelectedPacks((prev) => {
       const newPacks = new Map(prev);
       if (newPacks.has(packId)) {
-        newPacks.delete(packId); // Deselect pack if already selected
+        newPacks.delete(packId);
       } else {
-        newPacks.set(packId, 1); // Select pack with default quantity 1
+        newPacks.set(packId, 1);
       }
       return newPacks;
     });
@@ -50,20 +59,18 @@ const OrderForm: React.FC = () => {
       }
       return newPacks;
     });
-    calculateTotalCost();
   };
 
   const handleExtraClick = (extra: string) => {
     setSelectedExtras((prev) => {
       const newExtras = new Map(prev);
       if (newExtras.has(extra)) {
-        newExtras.delete(extra); // Deselect extra if already selected
+        newExtras.delete(extra);
       } else {
-        newExtras.set(extra, 1); // Select extra with default quantity 1
+        newExtras.set(extra, 1);
       }
       return newExtras;
     });
-    calculateTotalCost();
   };
 
   const handleExtraQuantityChange = (extra: string, quantity: number) => {
@@ -74,30 +81,46 @@ const OrderForm: React.FC = () => {
       }
       return newExtras;
     });
-    calculateTotalCost();
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    // Validate that at least 3 extras are selected if no pack is selected
+    
     if (selectedPacks.size === 0 && selectedExtras.size < 3) {
       alert('Please select at least 3 extras when no pack is selected.');
       return;
     }
 
-    const selectedPacksWithQuantities = Array.from(selectedPacks.entries()).map(
-      ([packId, qty]) => `${packId} (x${qty})`
-    );
-    const selectedExtrasWithQuantities = Array.from(selectedExtras.entries()).map(
-      ([extra, qty]) => `${extra} (x${qty})`
-    );
+    try {
+      setIsSubmitting(true);
+      const orderData = {
+        packs: Array.from(selectedPacks.entries()).map(([packId, qty]) => ({
+          pack_id: packId,
+          quantity: qty
+        })),
+        extras: Array.from(selectedExtras.entries()).map(([extra, qty]) => ({
+          extra_name: extra,
+          quantity: qty
+        })),
+        total_cost: totalCost
+      };
 
-    alert(
-      `Selected Packs: ${selectedPacksWithQuantities.join(', ')}\nSelected Extras: ${selectedExtrasWithQuantities.join(', ')}\nTotal Cost: $${totalCost}`
-    );
+      await onSubmit(orderData);
+      
+      // Reset form after successful submission
+      setSelectedPacks(new Map());
+      setSelectedExtras(new Map());
+      setTotalCost(0);
+      
+    } catch (error) {
+      console.error('Error submitting order:', error);
+      alert('Failed to submit order. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
+  // Rest of your component JSX remains the same, just update the button to show loading state
   return (
     <div className="min-vh-100 bg-light d-flex align-items-center py-4">
       <div className="container">
@@ -177,25 +200,25 @@ const OrderForm: React.FC = () => {
                 </div>
               ))}
             </div>
-
-            {/* Extra Quantities */}
-            {Array.from(selectedExtras.entries()).map(([extra, qty]) => (
-              <div className="d-flex justify-content-between align-items-center mb-2" key={extra}>
-                <span>{extra}</span>
-                <select
-                  className="form-control w-25"
-                  value={qty}
-                  onChange={(e) => handleExtraQuantityChange(extra, Number(e.target.value))}
-                >
-                  {[...Array(10)].map((_, index) => (
-                    <option key={index + 1} value={index + 1}>
-                      {index + 1}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ))}
           </div>
+
+          {/* Extra Quantities */}
+          {Array.from(selectedExtras.entries()).map(([extra, qty]) => (
+            <div className="d-flex justify-content-between align-items-center mb-2" key={extra}>
+              <span>{extra}</span>
+              <select
+                className="form-control w-25"
+                value={qty}
+                onChange={(e) => handleExtraQuantityChange(extra, Number(e.target.value))}
+              >
+                {[...Array(10)].map((_, index) => (
+                  <option key={index + 1} value={index + 1}>
+                    {index + 1}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ))}
 
           {/* Total Cost */}
           <div className="mb-4">
@@ -203,8 +226,12 @@ const OrderForm: React.FC = () => {
           </div>
 
           {/* Submit Button */}
-          <button type="submit" className="btn btn-primary w-100">
-            Submit
+          <button 
+            type="submit" 
+            className="btn btn-primary w-100"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Submitting...' : 'Submit'}
           </button>
         </form>
       </div>
