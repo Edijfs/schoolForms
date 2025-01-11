@@ -1,8 +1,7 @@
-// ContactForm.tsx
 import React, { useState } from 'react';
 
 interface ContactFormProps {
-  onSubmit: (data: any) => void;
+  onSubmit: (data: any) => Promise<void>;
 }
 
 const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
@@ -14,6 +13,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Submitting Contact Form:', formData);
     await onSubmit(formData);
   };
 
@@ -27,8 +27,8 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
 
   return (
     <div className="container">
-      <form onSubmit={handleSubmit} className="card p-4 shadow-sm">
-        <h3 className="text-center mb-4">Informação de contacto</h3>
+      <form onSubmit={handleSubmit} className="card p-4 shadow-sm" autoComplete="on">
+        <h3 className="text-center mb-4">Contact Information</h3>
         
         <div className="mb-3">
           <label htmlFor="name" className="form-label">Name</label>
@@ -40,6 +40,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
             value={formData.name}
             onChange={handleChange}
             required
+            autoComplete="name"
           />
         </div>
 
@@ -53,6 +54,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
             value={formData.email}
             onChange={handleChange}
             required
+            autoComplete="email"
           />
         </div>
 
@@ -66,6 +68,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
             value={formData.phone}
             onChange={handleChange}
             required
+            autoComplete="tel"
           />
         </div>
 

@@ -14,6 +14,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Submitting Student Form:', formData);
     await onSubmit(formData);
   };
 
@@ -27,7 +28,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
 
   return (
     <div className="container">
-      <form onSubmit={handleSubmit} className="card p-4 shadow-sm">
+      <form onSubmit={handleSubmit} className="card p-4 shadow-sm" autoComplete="on">
         <h3 className="text-center mb-4">Student Information</h3>
         
         <div className="mb-3">
@@ -40,6 +41,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
             value={formData.firstName}
             onChange={handleChange}
             required
+            autoComplete="given-name"
           />
         </div>
 
@@ -53,6 +55,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
             value={formData.lastName}
             onChange={handleChange}
             required
+            autoComplete="family-name"
           />
         </div>
 
@@ -66,6 +69,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
             value={formData.phone}
             onChange={handleChange}
             required
+            autoComplete="tel"
           />
         </div>
 
@@ -79,6 +83,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
             onChange={handleChange}
             rows={3}
             required
+            autoComplete="address-line1"
           />
         </div>
 
