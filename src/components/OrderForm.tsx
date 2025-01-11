@@ -1,52 +1,73 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
-interface OrderFormProps {
-  onSubmit: (data: any) => Promise<void>;
-}
-
-interface Extra {
+interface Product {
+  id: string;
   name: string;
   description: string;
+  extraImages: { extra: string; description: string }[];
+  extras: string[];
 }
 
-const extras: Extra[] = [
-  { name: 'Foto 15x20', description: '' },
-  { name: 'Gift Wrap', description: 'Gift wrapping for your order.' },
-  { name: 'Priority Shipping', description: 'Expedited shipping for faster delivery.' },
-  { name: 'Customization', description: 'Custom design tailored to your needs.' },
-  { name: 'Extended Support', description: 'Extended technical support for 6 months.' },
-  { name: 'Installation', description: 'Professional installation service.' },
+const products: Product[] = [
+  {
+    id: 'Pack 1',
+    name: 'Pack 1',
+    description: 'Pack descriptions',
+    extraImages: [
+      { extra: 'Extra Warranty', description: 'Extended warranty for an additional year.' },
+      { extra: 'Gift Wrap', description: 'Gift wrapping for your order.' },
+      { extra: 'Priority Shipping', description: 'Expedited shipping for faster delivery.' },
+    ],
+    extras: ['Extra Warranty', 'Gift Wrap', 'Priority Shipping'],
+  },
+  {
+    id: 'Pack 2',
+    name: 'Pack 2',
+    description: 'Pack descriptions',
+    extraImages: [
+      { extra: 'Customization', description: 'Custom design tailored to your needs.' },
+      { extra: 'Extended Support', description: 'Extended technical support for 6 months.' },
+      { extra: 'Installation', description: 'Professional installation service.' },
+    ],
+    extras: ['Customization', 'Extended Support', 'Installation'],
+  },
+  {
+    id: 'Only extras',
+    name: 'Only Extras',
+    description: 'Select extras without choosing a pack.',
+    extraImages: [
+      { extra: 'Customization', description: 'Custom design tailored to your needs.' },
+      { extra: 'Extended Support', description: 'Extended technical support for 6 months.' },
+      { extra: 'Installation', description: 'Professional installation service.' },
+    ],
+    extras: ['Customization', 'Extended Support', 'Installation'],
+  },
 ];
 
-const packs = [
-  { id: 'Pack 1', description: 'Basic pack for your needs.' },
-  { id: 'Pack 2', description: 'Advanced pack with more features.' },
-];
-
-const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
+const OrderForm: React.FC = () => {
   const [selectedPacks, setSelectedPacks] = useState<Map<string, number>>(new Map());
   const [selectedExtras, setSelectedExtras] = useState<Map<string, number>>(new Map());
-  const [totalCost, setTotalCost] = useState<number>(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const calculateTotalCost = () => {
-    const packCost = Array.from(selectedPacks.values()).reduce((sum, qty) => sum + qty * 50, 0);
-    const extraCost = Array.from(selectedExtras.values()).reduce((sum, qty) => sum + qty * 10, 0);
-    setTotalCost(packCost + extraCost);
-  };
-
-  useEffect(() => {
-    calculateTotalCost();
-  }, [selectedPacks, selectedExtras]);
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   const handlePackClick = (packId: string) => {
     setSelectedPacks((prev) => {
       const newPacks = new Map(prev);
-      if (newPacks.has(packId)) {
-        newPacks.delete(packId);
-      } else {
+
+      if (packId === 'Only extras') {
+        // Show modal when "Only Extras" is selected
+        setShowModal(true);
+        newPacks.clear();
         newPacks.set(packId, 1);
+      } else {
+        // Remove "Only Extras" if another pack is selected
+        newPacks.delete('Only extras');
+        if (newPacks.has(packId)) {
+          newPacks.delete(packId); // Toggle pack selection
+        } else {
+          newPacks.set(packId, 1);
+        }
       }
+
       return newPacks;
     });
   };
@@ -83,44 +104,25 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
     });
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    
-    if (selectedPacks.size === 0 && selectedExtras.size < 3) {
-      alert('Please select at least 3 extras when no pack is selected.');
+
+    // Validate "Only Extras" selection
+    if (selectedPacks.has('Only extras') && selectedExtras.size < 3) {
+      alert('Please select at least 3 extras when choosing "Only Extras".');
       return;
     }
 
-    try {
-      setIsSubmitting(true);
-      const orderData = {
-        packs: Array.from(selectedPacks.entries()).map(([packId, qty]) => ({
-          pack_id: packId,
-          quantity: qty
-        })),
-        extras: Array.from(selectedExtras.entries()).map(([extra, qty]) => ({
-          extra_name: extra,
-          quantity: qty
-        })),
-        total_cost: totalCost
-      };
+    const selectedPacksWithQuantities = Array.from(selectedPacks.entries()).map(
+      ([packId, qty]) => `${packId} (x${qty})`
+    );
+    const selectedExtrasWithQuantities = Array.from(selectedExtras.entries()).map(
+      ([extra, qty]) => `${extra} (x${qty})`
+    );
 
-      await onSubmit(orderData);
-      
-      // Reset form after successful submission
-      setSelectedPacks(new Map());
-      setSelectedExtras(new Map());
-      setTotalCost(0);
-      
-    } catch (error) {
-      console.error('Error submitting order:', error);
-      alert('Failed to submit order. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    alert(`Selected Packs: ${selectedPacksWithQuantities.join(', ')}\nSelected Extras: ${selectedExtrasWithQuantities.join(', ')}`);
   };
 
-  // Rest of your component JSX remains the same, just update the button to show loading state
   return (
     <div className="min-vh-100 bg-light d-flex align-items-center py-4">
       <div className="container">
@@ -131,110 +133,127 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
           <div className="mb-4">
             <h5>Select Packs</h5>
             <div className="d-flex gap-3">
-              {packs.map((pack) => (
+              {products.map((p) => (
                 <div
-                  key={pack.id}
-                  onClick={() => handlePackClick(pack.id)}
+                  key={p.id}
+                  onClick={() => handlePackClick(p.id)}
                   className={`card text-center p-3 ${
-                    selectedPacks.has(pack.id) ? 'border-primary' : 'border-light'
+                    selectedPacks.has(p.id) ? 'border-primary' : 'border-light'
                   }`}
                   style={{
                     cursor: 'pointer',
                     flex: 1,
-                    boxShadow: selectedPacks.has(pack.id) ? '0 0 10px rgba(0, 123, 255, 0.5)' : 'none',
+                    boxShadow: selectedPacks.has(p.id) ? '0 0 10px rgba(0, 123, 255, 0.5)' : 'none',
                   }}
                 >
-                  <h6>{pack.id}</h6>
-                  <p style={{ fontSize: '0.875rem' }}>{pack.description}</p>
+                  <h6>{p.name}</h6>
+                  <p style={{ fontSize: '0.875rem' }}>{p.description}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Pack Quantities */}
-          {Array.from(selectedPacks.entries()).map(([packId, qty]) => (
-            <div className="mb-3" key={packId}>
-              <h6>{packId} Quantity</h6>
-              <select
-                className="form-control"
-                value={qty}
-                onChange={(e) => handlePackQuantityChange(packId, Number(e.target.value))}
-              >
-                {[...Array(10)].map((_, index) => (
-                  <option key={index + 1} value={index + 1}>
-                    {index + 1}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ))}
+          {Array.from(selectedPacks.entries()).map(([packId, qty]) =>
+            packId !== 'Only extras' ? (
+              <div className="mb-3" key={packId}>
+                <h6>{packId} Quantity</h6>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={qty}
+                  min="1"
+                  onChange={(e) => handlePackQuantityChange(packId, Math.max(1, Number(e.target.value)))}
+                />
+              </div>
+            ) : null
+          )}
 
           {/* Extras Options */}
           <div className="mb-4">
             <h5>Select Extras</h5>
             <div className="row">
-              {extras.map((extra, index) => (
-                <div
-                  key={index}
-                  className="col-6 col-md-4"
-                  onClick={() => handleExtraClick(extra.name)}
-                  style={{ cursor: 'pointer' }}
-                >
+              {products.flatMap((p) =>
+                p.extraImages.map((img, index) => (
                   <div
-                    className={`p-3 text-center border rounded ${
-                      selectedExtras.has(extra.name) ? 'border-primary' : 'border-secondary'
-                    }`}
+                    key={`${p.id}-${index}`}
+                    className="col-6 col-md-4"
+                    onClick={() => handleExtraClick(img.extra)}
+                    style={{ cursor: 'pointer' }}
                   >
                     <div
-                      style={{
-                        width: '100%',
-                        height: '80px',
-                        backgroundColor: selectedExtras.has(extra.name) ? '#007bff' : '#ddd',
-                        borderRadius: '5px',
-                        marginBottom: '10px',
-                      }}
-                    ></div>
-                    <h6 style={{ fontSize: '0.875rem' }}>{extra.name}</h6>
-                    <p style={{ fontSize: '0.75rem' }}>{extra.description}</p>
+                      className={`p-3 text-center border rounded ${
+                        selectedExtras.has(img.extra) ? 'border-primary' : 'border-secondary'
+                      }`}
+                    >
+                      <div
+                        style={{
+                          width: '100%',
+                          height: '80px',
+                          backgroundColor: selectedExtras.has(img.extra) ? '#007bff' : '#ddd',
+                          borderRadius: '5px',
+                          marginBottom: '10px',
+                        }}
+                      ></div>
+                      <h6 style={{ fontSize: '0.875rem' }}>{img.extra}</h6>
+                      <p style={{ fontSize: '0.75rem' }}>{img.description}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
-          </div>
 
-          {/* Extra Quantities */}
-          {Array.from(selectedExtras.entries()).map(([extra, qty]) => (
-            <div className="d-flex justify-content-between align-items-center mb-2" key={extra}>
-              <span>{extra}</span>
-              <select
-                className="form-control w-25"
-                value={qty}
-                onChange={(e) => handleExtraQuantityChange(extra, Number(e.target.value))}
-              >
-                {[...Array(10)].map((_, index) => (
-                  <option key={index + 1} value={index + 1}>
-                    {index + 1}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ))}
-
-          {/* Total Cost */}
-          <div className="mb-4">
-            <h5>Total Cost: ${totalCost}</h5>
+            {/* Extra Quantities */}
+            {Array.from(selectedExtras.entries()).map(([extra, qty]) => (
+              <div className="d-flex justify-content-between align-items-center mb-2" key={extra}>
+                <span>{extra}</span>
+                <input
+                  type="number"
+                  className="form-control w-25"
+                  value={qty}
+                  min="1"
+                  onChange={(e) => handleExtraQuantityChange(extra, Math.max(1, Number(e.target.value)))}
+                />
+              </div>
+            ))}
           </div>
 
           {/* Submit Button */}
-          <button 
-            type="submit" 
-            className="btn btn-primary w-100"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit'}
+          <button type="submit" className="btn btn-primary w-100">
+            Submit
           </button>
         </form>
       </div>
+
+      {/* Modal Popup */}
+      {showModal && (
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Important Information</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>At least 3 extras are required for submission when "Only Extras" is selected.</p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
