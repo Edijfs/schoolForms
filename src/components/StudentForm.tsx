@@ -2,13 +2,12 @@
 import React, { useState } from 'react';
 
 interface StudentFormProps {
-  onSubmit: (data: { name_stu: string; school: string; class: string }) => void;
+  onSubmit: (data: { name_stu: string; class: string }) => void;
 }
 
 const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
   const [formData, setFormData] = useState({
     name_stu: '',
-    school: '',
     class: '',
   });
 
@@ -42,19 +41,6 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
                     id="name_stu"
                     name="name_stu"
                     value={formData.name_stu}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label htmlFor="school" className="form-label">School</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="school"
-                    name="school"
-                    value={formData.school}
                     onChange={handleChange}
                     required
                   />

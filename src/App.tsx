@@ -5,6 +5,7 @@ import StudentForm from './components/StudentForm';
 import OrderForm from './components/OrderForm';
 import { submitOrder } from './api/directusService';
 import { sendOrderConfirmationEmail } from './api/emailService';
+import { SchoolProvider } from './components/SchoolContext';
 
 interface OrderData {
   name_ed: string;
@@ -27,8 +28,16 @@ export default function App() {
     setCurrentForm('student');
   };
 
-  const handleStudentSubmit = (data: { name_stu: string; school: string; class: string }) => {
-    setOrderData(prev => ({ ...prev, ...data }));
+  const handleStudentSubmit = (data: { name_stu: string; class: string }) => {
+    // Get school from URL parameter
+    const params = new URLSearchParams(window.location.search);
+    const school = params.get('school') || 'Unknown School';
+    
+    setOrderData(prev => ({ 
+      ...prev, 
+      ...data,
+      school // Add school to the order data
+    }));
     setCurrentForm('order');
   };
 
@@ -41,41 +50,39 @@ export default function App() {
     const finalData = { ...orderData, ...data } as OrderData;
     
     try {
-      // Submit order to Directus
       const orderResult = await submitOrder(finalData);
       
       if (!orderResult) {
         throw new Error('Failed to submit order');
       }
 
-      // Only send confirmation email if order was successfully submitted
       try {
         await sendOrderConfirmationEmail(finalData);
       } catch (emailError) {
         console.error('Error sending confirmation email:', emailError);
-        // Don't fail the whole operation if just the email fails
       }
       
-      // Reset form and go back to contact form
       setOrderData({});
       setCurrentForm('contact');
     } catch (error) {
       console.error('Error processing order:', error);
-      throw error; // Re-throw the error so OrderForm can handle it
+      throw error;
     }
   };
 
   return (
-    <div className="min-vh-100 bg-light">
-      {currentForm === 'contact' && (
-        <ContactForm onSubmit={handleContactSubmit} />
-      )}
-      {currentForm === 'student' && (
-        <StudentForm onSubmit={handleStudentSubmit} />
-      )}
-      {currentForm === 'order' && (
-        <OrderForm onSubmit={handleOrderSubmit} />
-      )}
-    </div>
+    <SchoolProvider>
+      <div className="min-vh-100 bg-light">
+        {currentForm === 'contact' && (
+          <ContactForm onSubmit={handleContactSubmit} />
+        )}
+        {currentForm === 'student' && (
+          <StudentForm onSubmit={handleStudentSubmit} />
+        )}
+        {currentForm === 'order' && (
+          <OrderForm onSubmit={handleOrderSubmit} />
+        )}
+      </div>
+    </SchoolProvider>
   );
 }

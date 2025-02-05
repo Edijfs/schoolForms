@@ -1,17 +1,25 @@
 // ContactForm.tsx
 import React, { useState } from 'react';
+import { useSchool } from '../components/SchoolContext';
 
 interface ContactFormProps {
   onSubmit: (data: { name_ed: string; email: string }) => void;
 }
 
+interface FormData {
+  name_ed: string;
+  email: string;
+}
+
 const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
-  const [formData, setFormData] = useState({
+  const { schoolName } = useSchool();
+  const [formData, setFormData] = useState<FormData>({
     name_ed: '',
     email: ''
   });
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showTermsError, setShowTermsError] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +40,21 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
     }));
   };
 
-  const handleTermsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAcceptTerms = () => {
+    setTermsAccepted(true);
+    setShowTermsError(false);
+    setShowTermsModal(false);
+  };
+
+  const handleTermsClick = () => {
+    setShowTermsModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowTermsModal(false);
+  };
+
+  const handleTermsCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTermsAccepted(e.target.checked);
     if (e.target.checked) {
       setShowTermsError(false);
@@ -44,10 +66,19 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-12 col-md-6">
+            {/* School Name Header */}
+            {schoolName && (
+              <h2 className="text-center mb-4">
+                A minha escola - {decodeURIComponent(schoolName)}
+              </h2>
+            )}
+
+            {/* Main Form */}
             <form onSubmit={handleSubmit} className="card shadow-sm">
               <div className="card-body p-4">
                 <h3 className="text-center mb-4">Contact Information</h3>
                 
+                {/* Name Field */}
                 <div className="mb-3">
                   <label htmlFor="name_ed" className="form-label">Name</label>
                   <input
@@ -62,6 +93,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
                   />
                 </div>
 
+                {/* Email Field */}
                 <div className="mb-4">
                   <label htmlFor="email" className="form-label">Email</label>
                   <input
@@ -76,6 +108,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
                   />
                 </div>
 
+                {/* Terms Checkbox */}
                 <div className="mb-4">
                   <div className="form-check">
                     <input
@@ -83,19 +116,18 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
                       className={`form-check-input ${showTermsError ? 'is-invalid' : ''}`}
                       id="terms"
                       checked={termsAccepted}
-                      onChange={handleTermsChange}
+                      onChange={handleTermsCheckbox}
                     />
                     <label className="form-check-label" htmlFor="terms">
                       I accept the{' '}
-                      <a 
-                        href="#" 
-                        data-bs-toggle="modal" 
-                        data-bs-target="#termsModal"
-                        onClick={(e) => e.preventDefault()}
-                        className="text-primary text-decoration-none"
+                      <button
+                        type="button"
+                        className="btn btn-link p-0 d-inline text-decoration-none"
+                        onClick={handleTermsClick}
+                        style={{ verticalAlign: 'baseline' }}
                       >
                         terms and conditions
-                      </a>
+                      </button>
                     </label>
                     {showTermsError && (
                       <div className="invalid-feedback">
@@ -105,6 +137,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
                   </div>
                 </div>
 
+                {/* Submit Button */}
                 <button 
                   type="submit" 
                   className="btn btn-primary w-100"
@@ -119,46 +152,58 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
 
       {/* Terms and Conditions Modal */}
       <div 
-        className="modal fade" 
-        id="termsModal" 
+        className={`modal fade ${showTermsModal ? 'show' : ''}`}
+        style={{ 
+          display: showTermsModal ? 'block' : 'none', 
+          backgroundColor: 'rgba(0,0,0,0.5)' 
+        }}
         tabIndex={-1}
-        aria-labelledby="termsModalLabel" 
-        aria-hidden="true"
+        role="dialog"
+        aria-modal={showTermsModal}
       >
-        <div className="modal-dialog modal-dialog-scrollable">
+        <div className="modal-dialog modal-lg">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="termsModalLabel">Terms and Conditions</h5>
-              <button 
-                type="button" 
-                className="btn-close" 
-                data-bs-dismiss="modal" 
+              <h5 className="modal-title">Terms and Conditions</h5>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={handleCloseModal}
                 aria-label="Close"
-              ></button>
+              />
             </div>
             <div className="modal-body">
-              <h6>1. Introduction</h6>
-              <p>These Website Standard Terms and Conditions written on this webpage shall manage your use of our website.</p>
-              
-              <h6>2. Data Collection</h6>
-              <p>We collect personal information that you voluntarily provide to us when you register on the website, express an interest in obtaining information about us or our products and services.</p>
-              
-              <h6>3. Use of Information</h6>
-              <p>The personal information we collect is used to process your orders, manage your account, and provide you with customer service.</p>
-              
-              <h6>4. Privacy Policy</h6>
-              <p>Your privacy is important to us. It is our policy to respect your privacy regarding any information we may collect from you across our website.</p>
-              
-              <h6>5. Cookies</h6>
-              <p>We employ the use of cookies. By accessing our website, you agreed to use cookies in agreement with our Privacy Policy.</p>
+              <div className="terms-content">
+                <h6>1. General Terms</h6>
+                <p>By placing an order through our platform, you agree to these terms and conditions.</p>
+
+                <h6>2. Order Processing</h6>
+                <p>Orders will be processed once payment is confirmed. You will receive an email confirmation with your order details.</p>
+
+                <h6>3. Personal Information</h6>
+                <p>Your personal information will be handled according to our privacy policy and used only for order processing and communication purposes.</p>
+
+                <h6>4. Delivery</h6>
+                <p>Orders will be delivered to the school address provided during registration.</p>
+
+                <h6>5. Changes and Cancellations</h6>
+                <p>Please contact our support team for any changes or cancellations to your order.</p>
+              </div>
             </div>
             <div className="modal-footer">
-              <button 
-                type="button" 
-                className="btn btn-primary" 
-                data-bs-dismiss="modal"
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleCloseModal}
               >
-                I Understand
+                Close
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleAcceptTerms}
+              >
+                Accept Terms
               </button>
             </div>
           </div>

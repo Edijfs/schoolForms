@@ -1,21 +1,23 @@
 // api/directusService.ts
 const DIRECTUS_URL = 'https://directus.fcpro-school.com';
-const DIRECTUS_TOKEN = 'I9e3N08fhl1NtwIZFuU5W2KFfzwXLYMu'; 
+const DIRECTUS_TOKEN = 'eHaHMPvM1EtoclQHZVBSvGCs2dlvWKYE'; 
 
 interface OrderData {
   name_ed?: string;
   email?: string;
   name_stu?: string;
-  school?: string;
-  class?: string;
+  escola?: string;
+  turma?: string;
   packs?: string[];
   extras?: string[];
-  observation?: string;
+  obs?: string;
+  total_enc?: number;
+
 }
 
 export const submitOrder = async (orderData: OrderData) => {
   try {
-    const response = await fetch(`${DIRECTUS_URL}/items/orders`, {
+    const response = await fetch(`${DIRECTUS_URL}/items/encomendas`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
