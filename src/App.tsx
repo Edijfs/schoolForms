@@ -3,70 +3,63 @@ import { useState } from 'react';
 import ContactForm from './components/ContactForm';
 import StudentForm from './components/StudentForm';
 import OrderForm from './components/OrderForm';
-import { submitOrder } from './api/directusService';
-import { sendOrderConfirmationEmail } from './api/emailService';
+import { apiService } from './services/api';
 import { SchoolProvider } from './components/SchoolContext';
-
-interface OrderData {
-  name_ed: string;
-  email: string;
-  name_stu: string;
-  school: string;
-  class: string;
-  packs: string[];
-  extras: string[];
-  observation: string;
-  totalCost: number;
-}
+import { OrderData, OrderFormData, ContactFormData, StudentFormData } from './types/models';
 
 export default function App() {
   const [currentForm, setCurrentForm] = useState<'contact' | 'student' | 'order'>('contact');
   const [orderData, setOrderData] = useState<Partial<OrderData>>({});
 
-  const handleContactSubmit = (data: { name_ed: string; email: string }) => {
-    setOrderData(prev => ({ ...prev, ...data }));
+  const handleContactSubmit = (data: ContactFormData) => {
+    setOrderData(prev => ({ 
+      ...prev,
+      nome_ed: data.name_ed,   
+      email: data.email
+    }));
     setCurrentForm('student');
   };
-
-  const handleStudentSubmit = (data: { name_stu: string; class: string }) => {
-    // Get school from URL parameter
+  
+  const handleStudentSubmit = (data: StudentFormData) => {
     const params = new URLSearchParams(window.location.search);
     const school = params.get('school') || 'Unknown School';
     
     setOrderData(prev => ({ 
-      ...prev, 
-      ...data,
-      school // Add school to the order data
+      ...prev,
+      nome_stu: data.name_stu,  
+      turma: data.turma,        
+      escola: school            
     }));
     setCurrentForm('order');
   };
 
-  const handleOrderSubmit = async (data: { 
-    packs: string[]; 
-    extras: string[]; 
-    observation: string;
-    totalCost: number;
-  }) => {
-    const finalData = { ...orderData, ...data } as OrderData;
+  const handleOrderSubmit = async (formData: OrderFormData) => {
+    console.log('Form Data Received:', formData);
+    
+    const finalData: OrderData = {
+      nome_ed: orderData.nome_ed || '',
+      email: orderData.email || '',
+      nome_stu: orderData.nome_stu || '',
+      escola: orderData.escola || '',
+      turma: orderData.turma || '',
+      packs: formData.packs,
+      extras: formData.extras,
+      obs: formData.obs,
+      total_enc: formData.total_enc
+    };
+  
+    console.log('Final Data:', finalData);
     
     try {
-      const orderResult = await submitOrder(finalData);
-      
-      if (!orderResult) {
-        throw new Error('Failed to submit order');
-      }
-
-      try {
-        await sendOrderConfirmationEmail(finalData);
-      } catch (emailError) {
-        console.error('Error sending confirmation email:', emailError);
-      }
-      
+      await apiService.processOrder(finalData);
       setOrderData({});
       setCurrentForm('contact');
-    } catch (error) {
-      console.error('Error processing order:', error);
-      throw error;
+    } catch (error: unknown) {
+      console.error('Process Order Error:', error);
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('An unknown error occurred');
     }
   };
 

@@ -1,6 +1,6 @@
 // ContactForm.tsx
-import React, { useState } from 'react';
-import { useSchool } from '../components/SchoolContext';
+import React, { useState } from "react";
+import { useSchool } from "../components/SchoolContext";
 
 interface ContactFormProps {
   onSubmit: (data: { name_ed: string; email: string }) => void;
@@ -14,8 +14,8 @@ interface FormData {
 const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
   const { schoolName } = useSchool();
   const [formData, setFormData] = useState<FormData>({
-    name_ed: '',
-    email: ''
+    name_ed: "",
+    email: "",
   });
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showTermsError, setShowTermsError] = useState(false);
@@ -23,20 +23,20 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!termsAccepted) {
       setShowTermsError(true);
       return;
     }
-    
+
     onSubmit(formData);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -76,11 +76,13 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
             {/* Main Form */}
             <form onSubmit={handleSubmit} className="card shadow-sm">
               <div className="card-body p-4">
-                <h3 className="text-center mb-4">Contact Information</h3>
-                
+                <h3 className="text-center mb-4">Informações de contacto</h3>
+
                 {/* Name Field */}
                 <div className="mb-3">
-                  <label htmlFor="name_ed" className="form-label">Name</label>
+                  <label htmlFor="name_ed" className="form-label">
+                    Nome do educando
+                  </label>
                   <input
                     type="text"
                     className="form-control"
@@ -95,7 +97,9 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
 
                 {/* Email Field */}
                 <div className="mb-4">
-                  <label htmlFor="email" className="form-label">Email</label>
+                  <label htmlFor="email" className="form-label">
+                    Email
+                  </label>
                   <input
                     type="email"
                     className="form-control"
@@ -113,36 +117,35 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
                   <div className="form-check">
                     <input
                       type="checkbox"
-                      className={`form-check-input ${showTermsError ? 'is-invalid' : ''}`}
+                      className={`form-check-input ${
+                        showTermsError ? "is-invalid" : ""
+                      }`}
                       id="terms"
                       checked={termsAccepted}
                       onChange={handleTermsCheckbox}
                     />
                     <label className="form-check-label" htmlFor="terms">
-                      I accept the{' '}
+                      Eu aceito os{" "}
                       <button
                         type="button"
                         className="btn btn-link p-0 d-inline text-decoration-none"
                         onClick={handleTermsClick}
-                        style={{ verticalAlign: 'baseline' }}
+                        style={{ verticalAlign: "baseline" }}
                       >
-                        terms and conditions
+                        termos e condições
                       </button>
                     </label>
                     {showTermsError && (
                       <div className="invalid-feedback">
-                        You must accept the terms and conditions to proceed
+                        Tem de aceitar os termos e condições para avançar
                       </div>
                     )}
                   </div>
                 </div>
 
                 {/* Submit Button */}
-                <button 
-                  type="submit" 
-                  className="btn btn-primary w-100"
-                >
-                  Next
+                <button type="submit" className="btn btn-primary w-100">
+                  Avançar
                 </button>
               </div>
             </form>
@@ -151,11 +154,11 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
       </div>
 
       {/* Terms and Conditions Modal */}
-      <div 
-        className={`modal fade ${showTermsModal ? 'show' : ''}`}
-        style={{ 
-          display: showTermsModal ? 'block' : 'none', 
-          backgroundColor: 'rgba(0,0,0,0.5)' 
+      <div
+        className={`modal fade ${showTermsModal ? "show" : ""}`}
+        style={{
+          display: showTermsModal ? "block" : "none",
+          backgroundColor: "rgba(0,0,0,0.5)",
         }}
         tabIndex={-1}
         role="dialog"
@@ -164,7 +167,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
         <div className="modal-dialog modal-lg">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title">Terms and Conditions</h5>
+              <h5 className="modal-title">Termos e condições</h5>
               <button
                 type="button"
                 className="btn-close"
@@ -174,20 +177,35 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
             </div>
             <div className="modal-body">
               <div className="terms-content">
-                <h6>1. General Terms</h6>
-                <p>By placing an order through our platform, you agree to these terms and conditions.</p>
+                <h6>1. Termos Gerais</h6>
+                <p>
+                  Ao fazer um pedido através da nossa plataforma, você concorda
+                  com estes termos e condições.
+                </p>
 
-                <h6>2. Order Processing</h6>
-                <p>Orders will be processed once payment is confirmed. You will receive an email confirmation with your order details.</p>
+                <h6>2. Processamento do Pedido</h6>
+                <p>
+                  Os pedidos serão dados como processados após a confirmação do pagamento.
+                  Você receberá uma confirmação por email com os detalhes do seu pedido.
+                </p>
 
-                <h6>3. Personal Information</h6>
-                <p>Your personal information will be handled according to our privacy policy and used only for order processing and communication purposes.</p>
+                <h6>3. Informações Pessoais</h6>
+                <p>
+                  As informações pessoais serão tratadas de acordo com nossa
+                  política de privacidade e utilizadas apenas para processamento
+                  de pedidos e fins de comunicação.
+                </p>
 
-                <h6>4. Delivery</h6>
-                <p>Orders will be delivered to the school address provided during registration.</p>
+                <h6>4. Entrega</h6>
+                <p>
+                  Os pedidos serão entregues na escola.
+                </p>
 
-                <h6>5. Changes and Cancellations</h6>
-                <p>Please contact our support team for any changes or cancellations to your order.</p>
+                <h6>5. Alterações e Cancelamentos</h6>
+                <p>
+                  Por favor, entre em contato com a Fcpro (nºtel) para
+                  quaisquer alterações ou cancelamentos do seu pedido.
+                </p>
               </div>
             </div>
             <div className="modal-footer">
@@ -196,14 +214,14 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
                 className="btn btn-secondary"
                 onClick={handleCloseModal}
               >
-                Close
+                Fechar
               </button>
               <button
                 type="button"
                 className="btn btn-primary"
                 onClick={handleAcceptTerms}
               >
-                Accept Terms
+                Aceitar
               </button>
             </div>
           </div>

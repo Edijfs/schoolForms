@@ -1,14 +1,14 @@
 // StudentForm.tsx
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 interface StudentFormProps {
-  onSubmit: (data: { name_stu: string; class: string }) => void;
+  onSubmit: (data: { name_stu: string; turma: string }) => void;
 }
 
 const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
   const [formData, setFormData] = useState({
-    name_stu: '',
-    class: '',
+    name_stu: "",
+    turma: "", 
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -18,9 +18,9 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -31,10 +31,12 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
           <div className="col-12 col-md-6">
             <form onSubmit={handleSubmit} className="card shadow-sm">
               <div className="card-body p-4">
-                <h3 className="text-center mb-4">Student Information</h3>
-                
+                <h3 className="text-center mb-4">Informação do estudante</h3>
+
                 <div className="mb-3">
-                  <label htmlFor="name_stu" className="form-label">Student Name</label>
+                  <label htmlFor="name_stu" className="form-label">
+                    Nome do estudante
+                  </label>
                   <input
                     type="text"
                     className="form-control"
@@ -47,23 +49,22 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="class" className="form-label">Class</label>
+                  <label htmlFor="class" className="form-label">
+                    Turma / Sala
+                  </label>
                   <input
                     type="text"
                     className="form-control"
-                    id="class"
-                    name="class"
-                    value={formData.class}
+                    id="turma"
+                    name="turma"
+                    value={formData.turma}
                     onChange={handleChange}
                     required
                   />
                 </div>
 
-                <button 
-                  type="submit" 
-                  className="btn btn-primary w-100"
-                >
-                  Next
+                <button type="submit" className="btn btn-primary w-100">
+                  Avançar
                 </button>
               </div>
             </form>
