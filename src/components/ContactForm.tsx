@@ -76,12 +76,12 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
             {/* Main Form */}
             <form onSubmit={handleSubmit} className="card shadow-sm">
               <div className="card-body p-4">
-                <h3 className="text-center mb-4">Informações de contacto</h3>
+                <h3 className="text-center mb-4">Informações do encarregado de educação</h3>
 
                 {/* Name Field */}
                 <div className="mb-3">
                   <label htmlFor="name_ed" className="form-label">
-                    Nome do educando
+                    Nome:
                   </label>
                   <input
                     type="text"
@@ -98,7 +98,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
                 {/* Email Field */}
                 <div className="mb-4">
                   <label htmlFor="email" className="form-label">
-                    Email
+                    Email:
                   </label>
                   <input
                     type="email"
@@ -179,14 +179,15 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
               <div className="terms-content">
                 <h6>1. Termos Gerais</h6>
                 <p>
-                  Ao fazer um pedido através da nossa plataforma, você concorda
+                  Ao fazer um pedido através da nossa plataforma, concorda
                   com estes termos e condições.
                 </p>
 
                 <h6>2. Processamento do Pedido</h6>
                 <p>
-                  Os pedidos serão dados como processados após a confirmação do pagamento.
-                  Você receberá uma confirmação por email com os detalhes do seu pedido.
+                  Os pedidos serão dados como processados após efetuar o pagamento na sua escola.
+                  Receberá uma confirmação por email com os detalhes do seu pedido.
+                  Os pedidos realizados após o termino da data indicada, não seram processados.
                 </p>
 
                 <h6>3. Informações Pessoais</h6>
@@ -194,6 +195,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
                   As informações pessoais serão tratadas de acordo com nossa
                   política de privacidade e utilizadas apenas para processamento
                   de pedidos e fins de comunicação.
+                  Não nos responsabilizamos por erros no preenchimento do formulário.
                 </p>
 
                 <h6>4. Entrega</h6>
@@ -203,9 +205,10 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
 
                 <h6>5. Alterações e Cancelamentos</h6>
                 <p>
-                  Por favor, entre em contato com a Fcpro (nºtel) para
-                  quaisquer alterações ou cancelamentos do seu pedido.
+                  Por favor, entre em contato com a Fcpro através do nºtel: 932595411, ou email 
+                  fcpro.pbl@gmail.com para efetuar alterações ou cancelamentos do seu pedido.
                 </p>
+
               </div>
             </div>
             <div className="modal-footer">
