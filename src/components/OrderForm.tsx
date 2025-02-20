@@ -1,20 +1,93 @@
 // components/OrderForm.tsx
-import React, { useState } from 'react';
-import { useProducts } from '../hooks/useProducts';
-import { OrderFormProps } from '../types/models';
-//import { OrderFormData } from '../types/models';
+import React, { useState } from "react";
+import { useProducts } from "../hooks/useProducts";
+import { OrderFormProps } from "../types/models";
+
+interface QuantityControlProps {
+  quantity: number;
+  onIncrement: () => void;
+  onDecrement: () => void;
+  isDisabled: boolean;
+}
 
 const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
   // Use the products hook instead of direct imports
+
   const { products: packs, extras, loading, error } = useProducts();
-  
-  const [selectedPacks, setSelectedPacks] = useState<Map<string, number>>(new Map());
-  const [selectedExtras, setSelectedExtras] = useState<Map<string, number>>(new Map());
-  const [inputValues, setInputValues] = useState<Map<string, string>>(new Map());
-  const [observation, setObservation] = useState('');
+
+  const [selectedPacks, setSelectedPacks] = useState<Map<string, number>>(
+    new Map()
+  );
+  const [selectedExtras, setSelectedExtras] = useState<Map<string, number>>(
+    new Map()
+  );
+
+  const [observation, setObservation] = useState("");
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const [showPackModal, setShowPackModal] = useState(false);
+
+  const handlePackClick = (packId: string) => {
+    const selectedPack = packs.find((p) => p.id === packId);
+    const isPackSelected = selectedPacks.has(packId);
+
+    // Only show modal if selecting "pack Irmãos" (not deselecting)
+    if (
+      selectedPack?.name.toLowerCase().includes("irmãos") &&
+      !isPackSelected
+    ) {
+      setShowPackModal(true);
+    }
+
+    setSelectedPacks((prev) => {
+      const newPacks = new Map(prev);
+      if (newPacks.has(packId)) {
+        newPacks.delete(packId);
+      } else {
+        newPacks.set(packId, 1);
+      }
+      return newPacks;
+    });
+  };
+  //quantity control
+  const QuantityControl: React.FC<QuantityControlProps> = ({
+    quantity,
+    onIncrement,
+    onDecrement,
+    isDisabled,
+  }) => (
+    <div
+      className="btn-group btn-group-sm"
+      role="group"
+      aria-label="Quantity controls"
+    >
+      <button
+        type="button"
+        className="btn btn-outline-primary"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDecrement();
+        }}
+        disabled={isDisabled || quantity <= 1}
+      >
+        <i className="bi bi-dash"></i>
+      </button>
+      <span className="btn btn-outline-primary disabled">{quantity}</span>
+      <button
+        type="button"
+        className="btn btn-outline-primary"
+        onClick={(e) => {
+          e.stopPropagation();
+          onIncrement();
+        }}
+        disabled={isDisabled || quantity >= 99}
+      >
+        <i className="bi bi-plus"></i>
+      </button>
+    </div>
+  );
 
   // Loading state
   if (loading) {
@@ -38,82 +111,79 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
     );
   }
 
-  const getOfferedItemId = (): string | null => {
-    if (selectedExtras.size !== 3) return null;
-    
+  const getOfferedItemId = (): { id: string; quantity: number } | null => {
+    // Calculate total quantity of all extras
+    const totalQuantity = Array.from(selectedExtras.values()).reduce(
+      (sum, qty) => sum + qty,
+      0
+    );
+  
+    // Only apply offer if total quantity > 2
+    if (totalQuantity <= 2) return null;
+  
+    // Find the cheapest extra among the selected ones
     const selectedExtrasWithPrices = Array.from(selectedExtras.entries())
-      .map(([extraId, qty]) => {
-        const extra = extras.find(e => e.extra === extraId);
+      .map(([extraId]) => {
+        const extra = extras.find((e) => e.extra === extraId);
         return {
           id: extraId,
           price: extra?.price || 0,
-          totalCost: (extra?.price || 0) * qty
         };
       })
-      .sort((a, b) => a.totalCost - b.totalCost);
+      .sort((a, b) => a.price - b.price);
   
-    return selectedExtrasWithPrices[0].id;
+    // Return the cheapest selected extra with quantity 1
+    return selectedExtrasWithPrices.length > 0
+      ? { id: selectedExtrasWithPrices[0].id, quantity: 1 }
+      : null;
   };
 
   const calculateTotals = () => {
     let packTotal = 0;
     let extrasTotal = 0;
-
+  
+    // Calculate pack total
     selectedPacks.forEach((qty, packId) => {
-      const product = packs.find(p => p.id === packId);
+      const product = packs.find((p) => p.id === packId);
       if (product) {
         packTotal += product.price * qty;
       }
     });
-
-    if (selectedExtras.size === 3) {
-      const offeredItemId = getOfferedItemId();
-      selectedExtras.forEach((qty, extraId) => {
-        const extra = extras.find(e => e.extra === extraId);
-        if (extra && extraId !== offeredItemId) {
+  
+    // Calculate extras total
+    const offeredItem = getOfferedItemId();
+    selectedExtras.forEach((qty, extraId) => {
+      const extra = extras.find((e) => e.extra === extraId);
+      if (extra) {
+        if (offeredItem && extraId === offeredItem.id) {
+          // Price for offered item: multiply (qty - 1) by price since 1 quantity is free
+          extrasTotal += extra.price * (qty - 1);
+        } else {
+          // Normal price for non-offered items
           extrasTotal += extra.price * qty;
         }
-      });
-    } else {
-      selectedExtras.forEach((qty, extraId) => {
-        const extra = extras.find(e => e.extra === extraId);
-        if (extra) {
-          extrasTotal += extra.price * qty;
-        }
-      });
-    }
-
+      }
+    });
+  
     return {
       packTotal,
       extrasTotal,
       total: packTotal + extrasTotal,
-      offeredItemId: getOfferedItemId()
+      offeredItemId: offeredItem?.id || null,
     };
   };
 
   const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('pt-PT', {
-      style: 'currency',
-      currency: 'EUR',
+    return new Intl.NumberFormat("pt-PT", {
+      style: "currency",
+      currency: "EUR",
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }).format(amount);
   };
 
-  const handlePackClick = (packId: string) => {
-    setSelectedPacks(prev => {
-      const newPacks = new Map(prev);
-      if (newPacks.has(packId)) {
-        newPacks.delete(packId);
-      } else {
-        newPacks.set(packId, 1);
-      }
-      return newPacks;
-    });
-  };
-
   const handleExtraToggle = (extraId: string) => {
-    setSelectedExtras(prev => {
+    setSelectedExtras((prev) => {
       const newExtras = new Map(prev);
       if (newExtras.has(extraId)) {
         newExtras.delete(extraId);
@@ -125,27 +195,21 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
   };
 
   const handleQuantityChange = (
-    type: 'pack' | 'extra',
+    type: "pack" | "extra",
     id: string,
     value: string
   ) => {
-    setInputValues(prev => {
-      const newValues = new Map(prev);
-      newValues.set(`${type}-${id}`, value);
-      return newValues;
-    });
-
-    const quantity = value === '' ? 1 : parseInt(value);
+    const quantity = value === "" ? 1 : parseInt(value);
     const validQuantity = Math.max(1, Math.min(99, quantity || 1));
-    
-    if (type === 'pack') {
-      setSelectedPacks(prev => {
+
+    if (type === "pack") {
+      setSelectedPacks((prev) => {
         const newPacks = new Map(prev);
         newPacks.set(id, validQuantity);
         return newPacks;
       });
     } else {
-      setSelectedExtras(prev => {
+      setSelectedExtras((prev) => {
         const newExtras = new Map(prev);
         newExtras.set(id, validQuantity);
         return newExtras;
@@ -153,50 +217,57 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
     }
   };
 
-const handleSubmit = async () => {
-  const totals = calculateTotals();
-  const orderData = {
-    packs: Array.from(selectedPacks.entries()).map(([packId, qty]) => {
-      const product = packs.find(p => p.id === packId);
-      // Use product name instead of ID
-      return `${product?.name || packId} (x${qty}) - ${formatCurrency((product?.price ?? 0) * qty)}`;
-    }),
-    extras: Array.from(selectedExtras.entries()).map(([extraId, qty]) => {
-      const extra = extras.find(e => e.extra === extraId);
-      const isOffered = extraId === totals.offeredItemId;
-      return `${extraId} (x${qty}) ${isOffered ? '[OFERTA]' : ''} - ${formatCurrency(isOffered ? 0 : (extra?.price ?? 0) * qty)}`;
-    }),
-    obs: observation,
-    total_enc: totals.total
+  const handleSubmit = async () => {
+    const totals = calculateTotals();
+    const orderData = {
+      packs: Array.from(selectedPacks.entries()).map(([packId, qty]) => {
+        const product = packs.find((p) => p.id === packId);
+        // Use product name instead of ID
+        return `${product?.name || packId} (x${qty}) - ${formatCurrency(
+          (product?.price ?? 0) * qty
+        )}`;
+      }),
+      extras: Array.from(selectedExtras.entries()).map(([extraId, qty]) => {
+        const extra = extras.find((e) => e.extra === extraId);
+        const isOffered = extraId === totals.offeredItemId;
+        return `${extraId} (x${qty}) ${
+          isOffered ? "[OFERTA]" : ""
+        } - ${formatCurrency(isOffered ? 0 : (extra?.price ?? 0) * qty)}`;
+      }),
+      obs: observation,
+      total_enc: totals.total,
+    };
+
+    console.log("Order Form Data:", orderData); // Debug log
+
+    setIsSubmitting(true);
+
+    try {
+      await onSubmit(orderData);
+      setShowSummaryModal(false);
+      setSuccessMessage("Encomenda submetida com sucesso!");
+      setSelectedPacks(new Map());
+      setSelectedExtras(new Map());
+      setObservation("");
+    } catch (error: unknown) {
+      console.error("Submit Error:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      alert(`Erro ao submeter a encomenda: ${errorMessage}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
-  console.log('Order Form Data:', orderData); // Debug log
-
-  setIsSubmitting(true);
-
-  try {
-    await onSubmit(orderData);
-    setShowSummaryModal(false);
-    setSuccessMessage('Encomenda submetida com sucesso!');
-    setSelectedPacks(new Map());
-    setSelectedExtras(new Map());
-    setInputValues(new Map());
-    setObservation('');
-  } catch (error: unknown) {
-    console.error('Submit Error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    alert(`Erro ao submeter a encomenda: ${errorMessage}`);
-  } finally {
-    setIsSubmitting(false);
-  }
-};
 
   return (
     <div className="min-vh-100 bg-light d-flex align-items-center py-4">
       <div className="container">
         <div className="card shadow-sm">
           <div className="card-body p-4">
-            <h3 className="card-title text-center mb-4">Produtos fotográficos</h3>
+            <h3 className="card-title text-center mb-4 text-uppercase fw-bold">
+              Produtos
+            </h3>
+            <h5 className="text-center mb-4">Sessão fotográfica escolar</h5>
 
             {successMessage && (
               <div className="alert alert-success mb-4" role="alert">
@@ -204,25 +275,69 @@ const handleSubmit = async () => {
               </div>
             )}
 
-            {selectedExtras.size === 3 && (
-              <div className="alert alert-success mb-4">
-                <i className="bi bi-gift me-2"></i>
-                Parabéns! O extra mais barato é gratuito por ter selecionado 3 extras.
+            {/* Pack Information Modal */}
+            <div
+              className={`modal fade ${showPackModal ? "show" : ""}`}
+              style={{
+                display: showPackModal ? "block" : "none",
+                backgroundColor: "rgba(0,0,0,0.5)",
+              }}
+              tabIndex={-1}
+              role="dialog"
+              aria-modal={showPackModal}
+            >
+              <div className="modal-dialog">
+                <div className="modal-content">
+                  <div className="modal-header bg-primary text-white text-uppercase">
+                    <h5 className="modal-title">Informação Importante</h5>
+                    <button
+                      type="button"
+                      className="btn-close btn-close-white"
+                      onClick={() => setShowPackModal(false)}
+                      aria-label="Close"
+                    />
+                  </div>
+                  <div className="modal-body">
+                    <p>
+                      Ao selecionar o Pack Irmãos, certifique-se de incluir as
+                      seguintes informações dos irmãos nas observaçoes: Nome
+                      completo, turma/ano
+                    </p>
+                    <p className="mb-0 text-info">
+                      <i className="bi bi-info-circle me-2"></i>
+                      Esta informação é essencial para processarmos corretamente
+                      o seu pedido.
+                    </p>
+                  </div>
+                  <div className="modal-footer">
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={() => setShowPackModal(false)}
+                    >
+                      Entendi
+                    </button>
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
 
             {/* Pack Selection */}
             <div className="mb-4">
-              <h5 className="mb-3">PACK'S</h5>
+              <h5 className="mb-4 text-center fw-bold">PACK'S</h5>
               <div className="row g-3">
-                {packs.map(product => (
+                {packs.map((product) => (
                   <div className="col-md-4" key={product.id}>
                     <div
-                      onClick={() => !isSubmitting && handlePackClick(product.id)}
+                      onClick={() =>
+                        !isSubmitting && handlePackClick(product.id)
+                      }
                       className={`card h-100 ${
-                        selectedPacks.has(product.id) ? 'border-primary' : ''
-                      } ${isSubmitting ? 'opacity-50' : ''}`}
-                      style={{ cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
+                        selectedPacks.has(product.id) ? "border-primary" : ""
+                      } ${isSubmitting ? "opacity-50" : ""}`}
+                      style={{
+                        cursor: isSubmitting ? "not-allowed" : "pointer",
+                      }}
                       role="button"
                     >
                       <div className="card-body text-center">
@@ -230,10 +345,30 @@ const handleSubmit = async () => {
                         <p className="card-text small text-muted mb-2">
                           {product.description}
                         </p>
-                        <div className="mt-auto">
+                        <div className="d-flex flex-column align-items-center gap-2">
                           <span className="badge bg-primary fs-6">
                             {formatCurrency(product.price)}
                           </span>
+                          {selectedPacks.has(product.id) && (
+                            <QuantityControl
+                            quantity={selectedPacks.get(product.id) || 1}
+                            onIncrement={() =>
+                              handleQuantityChange(
+                                "pack",
+                                product.id,
+                                String((selectedPacks.get(product.id) || 1) + 1)
+                              )
+                            }
+                            onDecrement={() =>
+                              handleQuantityChange(
+                                "pack",
+                                product.id,
+                                String((selectedPacks.get(product.id) || 1) - 1)
+                              )
+                            }
+                            isDisabled={isSubmitting}
+                          />
+                          )}
                         </div>
                       </div>
                     </div>
@@ -242,42 +377,33 @@ const handleSubmit = async () => {
               </div>
             </div>
 
-            {/* Pack Quantities */}
-            {Array.from(selectedPacks.entries()).map(([packId, qty]) => (
-              <div className="mb-3" key={packId}>
-                <div className="d-flex justify-content-between align-items-center">
-                  <label htmlFor={`qty-${packId}`} className="form-label mb-0">
-                    Quantidade: {packId}
-                  </label>
-                  <span className="text-primary">
-                    {formatCurrency((packs.find(p => p.id === packId)?.price ?? 0) * qty)}
-                  </span>
-                </div>
-                <input
-                  type="number"
-                  className="form-control mt-1"
-                  id={`qty-${packId}`}
-                  value={inputValues.get(`pack-${packId}`) ?? qty.toString()}
-                  min="1"
-                  max="99"
-                  disabled={isSubmitting}
-                  onChange={(e) => handleQuantityChange('pack', packId, e.target.value)}
-                />
-              </div>
-            ))}
-
             {/* Extras Selection */}
-            <div className="mb-4">
-              <h5 className="mb-3">EXTRAS</h5>
+            <div className="mb-4 text-center">
+              <h5 className="mb-3 fw-bold">EXTRAS</h5>
               <div className="row g-3">
-                {extras.map(extra => (
+                {/* Show offer message when total quantity > 2 */}
+                {Array.from(selectedExtras.values()).reduce(
+                  (sum, qty) => sum + qty,
+                  0
+                ) > 2 && (
+                  <div className="alert alert-success mb-4">
+                    <i className="bi bi-gift me-2"></i>
+                    OFERTA! Uma unidade do extra de menor valor é gratuita
+                    quando seleciona 3 ou mais unidades.
+                  </div>
+                )}
+                {extras.map((extra) => (
                   <div className="col-md-4" key={extra.extra}>
                     <div
-                      onClick={() => !isSubmitting && handleExtraToggle(extra.extra)}
+                      onClick={() =>
+                        !isSubmitting && handleExtraToggle(extra.extra)
+                      }
                       className={`card h-100 ${
-                        selectedExtras.has(extra.extra) ? 'border-primary' : ''
-                      } ${isSubmitting ? 'opacity-50' : ''}`}
-                      style={{ cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
+                        selectedExtras.has(extra.extra) ? "border-primary" : ""
+                      } ${isSubmitting ? "opacity-50" : ""}`}
+                      style={{
+                        cursor: isSubmitting ? "not-allowed" : "pointer",
+                      }}
                       role="button"
                     >
                       <div className="card-body text-center">
@@ -285,10 +411,30 @@ const handleSubmit = async () => {
                         <p className="card-text small text-muted mb-2">
                           {extra.description}
                         </p>
-                        <div className="mt-auto">
+                        <div className="d-flex flex-column align-items-center gap-2">
                           <span className="badge bg-primary fs-6">
                             {formatCurrency(extra.price)}
                           </span>
+                          {selectedExtras.has(extra.extra) && (
+                            <QuantityControl
+                            quantity={selectedExtras.get(extra.extra) || 1}
+                            onIncrement={() =>
+                              handleQuantityChange(
+                                "extra",
+                                extra.extra,
+                                String((selectedExtras.get(extra.extra) || 1) + 1)
+                              )
+                            }
+                            onDecrement={() =>
+                              handleQuantityChange(
+                                "extra",
+                                extra.extra,
+                                String((selectedExtras.get(extra.extra) || 1) - 1)
+                              )
+                            }
+                            isDisabled={isSubmitting}
+                          />
+                          )}
                         </div>
                       </div>
                     </div>
@@ -296,38 +442,6 @@ const handleSubmit = async () => {
                 ))}
               </div>
             </div>
-
-            {/* Extra Quantities */}
-            {Array.from(selectedExtras.entries()).map(([extraId, qty]) => {
-              const extra = extras.find(e => e.extra === extraId);
-              const totalPrice = extra ? extra.price * qty : 0;
-              const totals = calculateTotals();
-              const isOfferedItem = extraId === totals.offeredItemId;
-              
-              return (
-                <div className="mb-3" key={extraId}>
-                  <div className="d-flex justify-content-between align-items-center">
-                    <label htmlFor={`extra-qty-${extraId}`} className="form-label mb-0">
-                      Quantidade: {extraId}
-                    </label>
-                    <span className={isOfferedItem ? 'text-success' : 'text-primary'}>
-                      {formatCurrency(totalPrice)}
-                      {isOfferedItem && ' (Oferta)'}
-                    </span>
-                  </div>
-                  <input
-                    type="number"
-                    className="form-control mt-1"
-                    id={`extra-qty-${extraId}`}
-                    value={inputValues.get(`extra-${extraId}`) ?? qty.toString()}
-                    min="1"
-                    max="99"
-                    disabled={isSubmitting}
-                    onChange={(e) => handleQuantityChange('extra', extraId, e.target.value)}
-                  />
-                </div>
-              );
-            })}
 
             {/* Order Summary */}
             {(selectedPacks.size > 0 || selectedExtras.size > 0) && (
@@ -355,7 +469,7 @@ const handleSubmit = async () => {
             )}
 
             {/* Observations */}
-            <div className="mb-4">
+            <div className="mb-4 text-uppercase">
               <label htmlFor="observation" className="form-label">
                 Observações
               </label>
@@ -375,15 +489,22 @@ const handleSubmit = async () => {
               type="button"
               className="btn btn-primary w-100"
               onClick={() => setShowSummaryModal(true)}
-              disabled={isSubmitting || (selectedPacks.size === 0 && selectedExtras.size === 0)}
+              disabled={
+                isSubmitting ||
+                (selectedPacks.size === 0 && selectedExtras.size === 0)
+              }
             >
               {isSubmitting ? (
                 <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                   A processar encomenda...
                 </>
               ) : (
-                'Visualizar encomenda'
+                "Visualizar encomenda"
               )}
             </button>
           </div>
@@ -391,9 +512,12 @@ const handleSubmit = async () => {
       </div>
 
       {/* Order Review Modal */}
-      <div 
-        className={`modal fade ${showSummaryModal ? 'show' : ''}`}
-        style={{ display: showSummaryModal ? 'block' : 'none', backgroundColor: 'rgba(0,0,0,0.5)' }}
+      <div
+        className={`modal fade ${showSummaryModal ? "show" : ""}`}
+        style={{
+          display: showSummaryModal ? "block" : "none",
+          backgroundColor: "rgba(0,0,0,0.5)",
+        }}
         tabIndex={-1}
         role="dialog"
         aria-modal={showSummaryModal}
@@ -422,23 +546,25 @@ const handleSubmit = async () => {
                       </span>
                     </h6>
                     <ul className="list-unstyled">
-                      {Array.from(selectedPacks.entries()).map(([packId, qty]) => {
-                        const product = packs.find(p => p.id === packId);
-                        const totalPrice = product ? product.price * qty : 0;
-                        return (
-                          <li key={packId} className="mb-2">
-                            <div className="d-flex justify-content-between">
-                              <span>
-                                <i className="bi bi-check2-circle text-success me-2"></i>
-                                {packId} (x{qty})
-                              </span>
-                              <span className="text-muted">
-                                {formatCurrency(totalPrice)}
-                              </span>
-                            </div>
-                          </li>
-                        );
-                      })}
+                      {Array.from(selectedPacks.entries()).map(
+                        ([packId, qty]) => {
+                          const product = packs.find((p) => p.id === packId);
+                          const totalPrice = product ? product.price * qty : 0;
+                          return (
+                            <li key={packId} className="mb-2">
+                              <div className="d-flex justify-content-between">
+                                <span>
+                                  <i className="bi bi-check2-circle text-success me-2"></i>
+                                  {packId} (x{qty})
+                                </span>
+                                <span className="text-muted">
+                                  {formatCurrency(totalPrice)}
+                                </span>
+                              </div>
+                            </li>
+                          );
+                        }
+                      )}
                     </ul>
                   </div>
                 )}
@@ -453,27 +579,46 @@ const handleSubmit = async () => {
                       </span>
                     </h6>
                     <ul className="list-unstyled">
-                      {Array.from(selectedExtras.entries()).map(([extraId, qty]) => {
-                        const extra = extras.find(e => e.extra === extraId);
-                        const totalPrice = extra ? extra.price * qty : 0;
-                        const totals = calculateTotals();
-                        const isOfferedItem = extraId === totals.offeredItemId;
+                      {Array.from(selectedExtras.entries()).map(
+                        ([extraId, qty]) => {
+                          const extra = extras.find((e) => e.extra === extraId);
+                          const totalPrice = extra ? extra.price * qty : 0;
+                          const totals = calculateTotals();
+                          const isOfferedItem =
+                            extraId === totals.offeredItemId;
 
-                        return (
-                          <li key={extraId} className="mb-2">
-                            <div className="d-flex justify-content-between">
-                              <span>
-                                <i className={`bi ${isOfferedItem ? 'bi-gift text-success' : 'bi-plus-circle text-primary'} me-2`}></i>
-                                {extraId} (x{qty})
-                                {isOfferedItem && <span className="badge bg-success ms-2">Oferta</span>}
-                              </span>
-                              <span className={isOfferedItem ? 'text-success text-decoration-line-through' : 'text-muted'}>
-                                {formatCurrency(totalPrice)}
-                              </span>
-                            </div>
-                          </li>
-                        );
-                      })}
+                          return (
+                            <li key={extraId} className="mb-2">
+                              <div className="d-flex justify-content-between">
+                                <span>
+                                  <i
+                                    className={`bi ${
+                                      isOfferedItem
+                                        ? "bi-gift text-success"
+                                        : "bi-plus-circle text-primary"
+                                    } me-2`}
+                                  ></i>
+                                  {extraId} (x{qty})
+                                  {isOfferedItem && (
+                                    <span className="badge bg-success ms-2">
+                                      Oferta
+                                    </span>
+                                  )}
+                                </span>
+                                <span
+                                  className={
+                                    isOfferedItem
+                                      ? "text-success text-decoration-line-through"
+                                      : "text-muted"
+                                  }
+                                >
+                                  {formatCurrency(totalPrice)}
+                                </span>
+                              </div>
+                            </li>
+                          );
+                        }
+                      )}
                     </ul>
                   </div>
                 )}
@@ -514,11 +659,15 @@ const handleSubmit = async () => {
               >
                 {isSubmitting ? (
                   <>
-                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
                     A processar encomenda...
                   </>
                 ) : (
-                  'Confirmar encomenda'
+                  "Confirmar encomenda"
                 )}
               </button>
             </div>
@@ -528,27 +677,25 @@ const handleSubmit = async () => {
 
       {/* Success Toast */}
       {successMessage && (
-        <div 
-          className="position-fixed top-0 end-0 p-3" 
+        <div
+          className="position-fixed top-0 end-0 p-3"
           style={{ zIndex: 1070 }}
         >
-          <div 
-            className="toast show" 
-            role="alert" 
-            aria-live="assertive" 
+          <div
+            className="toast show"
+            role="alert"
+            aria-live="assertive"
             aria-atomic="true"
           >
             <div className="toast-header bg-success text-white">
               <strong className="me-auto">Sucesso!</strong>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="btn-close btn-close-white"
                 onClick={() => setSuccessMessage(null)}
               />
             </div>
-            <div className="toast-body">
-              {successMessage}
-            </div>
+            <div className="toast-body">{successMessage}</div>
           </div>
         </div>
       )}
