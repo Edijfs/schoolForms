@@ -68,7 +68,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
           <div className="col-12 col-md-6">
             {/* School Name Header */}
             {schoolName && (
-              <h2 className="text-center mb-4">
+              <h2 className="text-center mb-4 text-primary fw-bold">
                 A minha escola - {decodeURIComponent(schoolName)}
               </h2>
             )}

@@ -22,13 +22,17 @@ export default function App() {
   
   const handleStudentSubmit = (data: StudentFormData) => {
     const params = new URLSearchParams(window.location.search);
-    const school = params.get('school') || 'Unknown School';
+    // Check both 'school' and 'School' parameter to be case-insensitive
+    const school = params.get('school') || params.get('School') || 'Unknown School';
+    
+    // Decode the school name if it's URL encoded
+    const decodedSchool = decodeURIComponent(school);
     
     setOrderData(prev => ({ 
       ...prev,
       nome_stu: data.name_stu,  
       turma: data.turma,        
-      escola: school            
+      escola: decodedSchool            
     }));
     setCurrentForm('order');
   };

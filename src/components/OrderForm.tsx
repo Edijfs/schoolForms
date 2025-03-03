@@ -328,7 +328,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
 
             {/* Pack Selection */}
             <div className="mb-4">
-              <h5 className="mb-4 text-center fw-bold bg-warning text-white px-3 py-1 rounded">PACK'S</h5>
+              <h5 className="mb-4 text-center fw-bold bg-warning text-white px-3 py-1 rounded ">PACK'S</h5>
               <div className="row g-3">
                 {packs.map((product) => (
                   <div className="col-md-4" key={product.id}>
