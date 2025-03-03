@@ -18,7 +18,7 @@ class ApiService {
 
   constructor() {
     this.baseUrl = import.meta.env.VITE_DIRECTUS_URL || 'https://directus.fcpro-school.com';
-    this.apiToken = import.meta.env.VITE_DIRECTUS_TOKEN || '';
+    this.apiToken = import.meta.env.VITE_DIRECTUS_TOKEN || 'eHaHMPvM1EtoclQHZVBSvGCs2dlvWKYE';
 
     if (!this.apiToken) {
       console.warn('API token not configured');

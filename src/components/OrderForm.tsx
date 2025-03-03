@@ -304,9 +304,13 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
                       completo, turma/ano
                     </p>
                     <p className="mb-0 text-info">
-                      <i className="bi bi-info-circle me-2"></i>
+                      <i className="bi bi-exclamation-triangle"></i>
                       Esta informação é essencial para processarmos corretamente
                       o seu pedido.
+                    </p>
+                    <p className="mb-0 text-info">
+                      <i className="bi bi-exclamation-triangle"></i>
+                      Caso pretenda só um pack coloque a sua escolha apenas num dos irmãos.
                     </p>
                   </div>
                   <div className="modal-footer">
@@ -324,7 +328,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
 
             {/* Pack Selection */}
             <div className="mb-4">
-              <h5 className="mb-4 text-center fw-bold">PACK'S</h5>
+              <h5 className="mb-4 text-center fw-bold bg-warning text-white px-3 py-1 rounded">PACK'S</h5>
               <div className="row g-3">
                 {packs.map((product) => (
                   <div className="col-md-4" key={product.id}>
@@ -333,7 +337,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
                         !isSubmitting && handlePackClick(product.id)
                       }
                       className={`card h-100 ${
-                        selectedPacks.has(product.id) ? "border-primary" : ""
+                        selectedPacks.has(product.id) ? "border-warning" : ""
                       } ${isSubmitting ? "opacity-50" : ""}`}
                       style={{
                         cursor: isSubmitting ? "not-allowed" : "pointer",
@@ -346,7 +350,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
                           {product.description}
                         </p>
                         <div className="d-flex flex-column align-items-center gap-2">
-                          <span className="badge bg-primary fs-6">
+                          <span className="badge bg-warning fs-6"> {/* cor fundo preço produto */}
                             {formatCurrency(product.price)}
                           </span>
                           {selectedPacks.has(product.id) && (
@@ -379,7 +383,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
 
             {/* Extras Selection */}
             <div className="mb-4 text-center">
-              <h5 className="mb-3 fw-bold">EXTRAS</h5>
+              <h5 className="bg-success text-white px-3 py-1 rounded">EXTRAS
+              </h5>
               <div className="row g-3">
                 {/* Show offer message when total quantity > 2 */}
                 {Array.from(selectedExtras.values()).reduce(
@@ -399,7 +404,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
                         !isSubmitting && handleExtraToggle(extra.extra)
                       }
                       className={`card h-100 ${
-                        selectedExtras.has(extra.extra) ? "border-primary" : ""
+                        selectedExtras.has(extra.extra) ? "border-success" : ""
                       } ${isSubmitting ? "opacity-50" : ""}`}
                       style={{
                         cursor: isSubmitting ? "not-allowed" : "pointer",
@@ -412,9 +417,9 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
                           {extra.description}
                         </p>
                         <div className="d-flex flex-column align-items-center gap-2">
-                          <span className="badge bg-primary fs-6">
-                            {formatCurrency(extra.price)}
-                          </span>
+                          <span className="badge bg-success fs-6"> {/* cor fundo preço extra */}
+                            {formatCurrency(extra.price)} 
+                            </span> 
                           {selectedExtras.has(extra.extra) && (
                             <QuantityControl
                             quantity={selectedExtras.get(extra.extra) || 1}
