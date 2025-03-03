@@ -16,11 +16,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
     'Sala Azul',
     'Sala Verde',
     'Sala Vermelha',
-    'A',
-    'B',
-    'C',
-    'D',
-    'E'
+    'A','B','C','D','E', 'F','G','H'
   ];
 
   const [formData, setFormData] = useState({
@@ -35,7 +31,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
     const combinedData = {
       name_stu: formData.name_stu,
       year: formData.year,
-      turma: `${formData.year}º${formData.selectedTurma}` // Concatenate year and turma
+      turma: `${formData.year}-${formData.selectedTurma}` // Concatenate year and turma
     };
     onSubmit(combinedData);
   };
@@ -88,9 +84,10 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
                     required
                   >
                     <option value="">Selecione o ano</option>
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((year) => (
+                    {["Créche","Pré-escolar","1º", "2º", "3º", "4º", "5º", 
+                    "6º", "7º", "8º", "9º", "10º", "11º", "12º"].map((year) => (
                       <option key={year} value={year}>
-                        {year}º ano
+                        {year}
                       </option>
                     ))}
                   </select>
@@ -120,9 +117,9 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
 
                 {/* Preview of combined class */}
                 {(formData.year || formData.selectedTurma) && (
-                  <div className="alert alert-info mb-4">
+                  <div className="alert alert-info fw-bold text-center mb-4">
                     <small>
-                      {formData.year && `${formData.year}º`}{formData.selectedTurma}
+                      {formData.year && `${formData.year}-`}{formData.selectedTurma}
                     </small>
                   </div>
                 )}
