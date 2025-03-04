@@ -25,9 +25,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [showSuccessScreen, setShowSuccessScreen] = useState<boolean>(false);
-
   const [showPackModal, setShowPackModal] = useState(false);
+  const [showOfferToast, setShowOfferToast] = useState(false);
 
   const handlePackClick = (packId: string) => {
     const selectedPack = packs.find((p) => p.id === packId);
@@ -189,6 +188,18 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
         newExtras.delete(extraId);
       } else {
         newExtras.set(extraId, 1);
+        
+        // Verificar se com este novo extra atingimos 3 ou mais no total
+        const totalExtrasCount = Array.from(newExtras.values()).reduce((sum, qty) => sum + qty, 0);
+        if (totalExtrasCount === 3) {
+          // Mostrar o toast apenas quando atingir exatamente 3 extras
+          setShowOfferToast(true);
+          
+          // Fechar o toast automaticamente após 5 segundos
+          setTimeout(() => {
+            setShowOfferToast(false);
+          }, 5000);
+        }
       }
       return newExtras;
     });
@@ -212,6 +223,21 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
       setSelectedExtras((prev) => {
         const newExtras = new Map(prev);
         newExtras.set(id, validQuantity);
+        
+        // Verificar se esta mudança de quantidade fez atingir 3 extras
+        const totalBefore = Array.from(prev.values()).reduce((sum, qty) => sum + qty, 0);
+        const totalAfter = Array.from(newExtras.values()).reduce((sum, qty) => sum + qty, 0);
+        
+        if (totalBefore < 3 && totalAfter >= 3) {
+          // Mostrar o toast quando atingir 3 ou mais extras através do incremento
+          setShowOfferToast(true);
+          
+          // Fechar o toast automaticamente após 5 segundos
+          setTimeout(() => {
+            setShowOfferToast(false);
+          }, 5000);
+        }
+        
         return newExtras;
       });
     }
@@ -231,8 +257,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
         const extra = extras.find((e) => e.extra === extraId);
         const isOffered = extraId === totals.offeredItemId;
         return `${extraId} (x${qty}) ${
-          isOffered ? "[OFERTA]" : ""
-        } - ${formatCurrency(isOffered ? 0 : (extra?.price ?? 0) * qty)}`;
+          isOffered ? "[1 UNIDADE OFERTA]" : ""
+        } - ${formatCurrency(isOffered ? (extra?.price ?? 0) * (qty - 1) : (extra?.price ?? 0) * qty)}`;
       }),
       obs: observation,
       total_enc: totals.total,
@@ -245,18 +271,10 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
     try {
       await onSubmit(orderData);
       setShowSummaryModal(false);
-      setSuccessMessage("Encomenda confirmada");
-      setShowSuccessScreen(true);
+      setSuccessMessage("Encomenda submetida com sucesso!");
       setSelectedPacks(new Map());
       setSelectedExtras(new Map());
       setObservation("");
-      
-      // Keep the toast message visible for 10 seconds before automatically closing it
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 10000);
-      
-      // But keep the full screen message until user action
     } catch (error: unknown) {
       console.error("Submit Error:", error);
       const errorMessage =
@@ -402,7 +420,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
                   <div className="alert alert-success mb-4">
                     <i className="bi bi-gift me-2"></i>
                     OFERTA! Uma unidade do extra de menor valor é gratuita
-                    quando seleciona 3 ou mais unidades.
+                    quando seleciona 3 ou mais unidades no total.
                   </div>
                 )}
                 {extras.map((extra) => (
@@ -595,37 +613,36 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
                       {Array.from(selectedExtras.entries()).map(
                         ([extraId, qty]) => {
                           const extra = extras.find((e) => e.extra === extraId);
-                          const totalPrice = extra ? extra.price * qty : 0;
                           const totals = calculateTotals();
-                          const isOfferedItem =
-                            extraId === totals.offeredItemId;
+                          const isOfferedItem = extraId === totals.offeredItemId;
 
                           return (
                             <li key={extraId} className="mb-2">
                               <div className="d-flex justify-content-between">
                                 <span>
-                                  <i
-                                    className={`bi ${
-                                      isOfferedItem
-                                        ? "bi-gift text-success"
-                                        : "bi-plus-circle text-primary"
-                                    } me-2`}
-                                  ></i>
+                                  <i className={`bi ${
+                                    isOfferedItem ? "bi-gift text-success" : "bi-plus-circle text-primary"
+                                  } me-2`}></i>
                                   {extraId} (x{qty})
                                   {isOfferedItem && (
                                     <span className="badge bg-success ms-2">
-                                      Oferta
+                                      1 unidade grátis
                                     </span>
                                   )}
                                 </span>
-                                <span
-                                  className={
-                                    isOfferedItem
-                                      ? "text-success text-decoration-line-through"
-                                      : "text-muted"
-                                  }
-                                >
-                                  {formatCurrency(totalPrice)}
+                                <span className="text-muted">
+                                  {isOfferedItem ? (
+                                    <>
+                                      <span className="text-decoration-line-through me-2">
+                                        {formatCurrency((extra?.price || 0) * qty)}
+                                      </span>
+                                      <span>
+                                        {formatCurrency((extra?.price || 0) * (qty - 1))}
+                                      </span>
+                                    </>
+                                  ) : (
+                                    formatCurrency((extra?.price || 0) * qty)
+                                  )}
                                 </span>
                               </div>
                             </li>
@@ -687,37 +704,62 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
           </div>
         </div>
       </div>
-      
-      {/* Full Screen Success Message - Centered with improved styling */}
-      {showSuccessScreen && (
-        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" 
-             style={{ zIndex: 1060, backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="text-center p-5 rounded shadow-lg bg-white" 
-               style={{ 
-                 maxWidth: '500px', 
-                 width: '90%',
-                 position: 'absolute',
-                 left: '50%',
-                 top: '50%',
-                 transform: 'translate(-50%, -50%)',
-                 boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
-               }}>
-            <div className="mb-4">
-              <i className="bi bi-check-circle-fill text-success" style={{ fontSize: '5rem' }}></i>
+
+      {/* Toast de Oferta */}
+      {showOfferToast && (
+        <div
+          className="position-fixed top-50 start-50 translate-middle"
+          style={{ zIndex: 1070 }}
+        >
+          <div
+            className="toast show shadow-lg"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+            style={{ 
+              minWidth: "350px", 
+              backgroundColor: "rgba(255, 255, 255, 0.95)",
+              border: "2px solid #28a745"
+            }}
+          >
+            <div className="toast-header bg-success text-white">
+              <i className="bi bi-gift me-2 fs-5"></i>
+              <strong className="me-auto fs-5">Oferta Especial!</strong>
+              <button
+                type="button"
+                className="btn-close btn-close-white"
+                onClick={() => setShowOfferToast(false)}
+              />
             </div>
-            <h2 className="mb-3 fw-bold">Encomenda confirmada</h2>
-            <p className="text-muted mb-4 fs-5">A sua encomenda foi validada com sucesso</p>
-            <button
-              className="btn btn-primary btn-lg px-4 py-2"
-              onClick={() => {
-                setShowSuccessScreen(false);
-                setSuccessMessage(null);
-                // Optionally reload the page or navigate to a new page
-                // window.location.reload();
-              }}
-            >
-              Fechar
-            </button>
+            <div className="toast-body p-3 bg-white">
+              <p className="mb-1 fs-5 text-dark"><strong>Parabéns!</strong> Uma unidade do extra de menor valor é <strong className="text-success">gratuita</strong>!</p>
+              <p className="text-dark mb-0">O desconto já foi aplicado ao seu pedido.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Toast */}
+      {successMessage && (
+        <div
+          className="position-fixed top-0 end-0 p-3"
+          style={{ zIndex: 1070 }}
+        >
+          <div
+            className="toast show"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+          >
+            <div className="toast-header bg-success text-white">
+              <strong className="me-auto">Sucesso!</strong>
+              <button
+                type="button"
+                className="btn-close btn-close-white"
+                onClick={() => setSuccessMessage(null)}
+              />
+            </div>
+            <div className="toast-body">{successMessage}</div>
           </div>
         </div>
       )}

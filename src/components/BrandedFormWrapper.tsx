@@ -25,8 +25,8 @@ const BrandedFormWrapper: React.FC<BrandedFormWrapperProps> = ({
         <div className="text-center mt-3">
           <small className="text-muted">
             Questões sobre a sua encomenda? {' '} 
-            <a href="mailto:fcpro.pbl@gmail.com" className="text-decoration-none">
-              fcpro.pbl@gmail.com
+            <a href="mailto:escolas.fcpro@gmail.com" className="text-decoration-none">
+              Enviar email
             </a>
           </small>
         </div>
