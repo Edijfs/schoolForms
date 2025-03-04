@@ -727,7 +727,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit, onReturnToContact }) =>
             aria-live="assertive"
             aria-atomic="true"
             style={{ 
-              minWidth: "450px", 
+              minWidth: "250px", 
               backgroundColor: "rgba(255, 255, 255, 0.95)",
               border: "2px solid #28a745"
             }}
