@@ -1,4 +1,4 @@
-// App.tsx - Updated with new CSS import
+// App.tsx
 import { useState } from 'react';
 import ContactForm from './components/ContactForm';
 import StudentForm from './components/StudentForm';
@@ -11,7 +11,7 @@ import { SchoolProvider } from './components/SchoolContext';
 import { OrderData, OrderFormData, ContactFormData, StudentFormData } from './types/models';
 import './styles/background.css';
 import './styles/brand.css';
-import './styles/forms.css'; // Add this new import
+import './styles/forms.css';
 
 export default function App() {
   const [currentForm, setCurrentForm] = useState<'contact' | 'student' | 'order'>('contact');
@@ -58,15 +58,7 @@ export default function App() {
     
     try {
       await apiService.processOrder(finalData);
-
-      // Don't immediately reset the form state to allow the success message to display
-      // The form will be reset when the user closes the success message or navigates away
-      
-      // Delayed reset (optional)
-      setTimeout(() => {
-         setOrderData({});
-         setCurrentForm('contact');
-       }, 10000);
+      // No need for timeout reset since the OrderForm will handle this now
     } catch (error: unknown) {
       console.error('Process Order Error:', error);
       if (error instanceof Error) {
@@ -74,6 +66,12 @@ export default function App() {
       }
       throw new Error('An unknown error occurred');
     }
+  };
+  
+  // Add this function to reset to contact form
+  const resetToContactForm = () => {
+    setOrderData({});
+    setCurrentForm('contact');
   };
 
   // Function to determine the progress step
@@ -127,7 +125,10 @@ export default function App() {
               <StudentForm onSubmit={handleStudentSubmit} />
             )}
             {currentForm === 'order' && (
-              <OrderForm onSubmit={handleOrderSubmit} />
+              <OrderForm 
+                onSubmit={handleOrderSubmit} 
+                onReturnToContact={resetToContactForm}  // Pass the navigation function
+              />
             )}
           </div>
           

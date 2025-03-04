@@ -94,29 +94,16 @@ class ApiService {
 
   async processOrder(orderData: OrderData): Promise<void> {
     try {
+      // Simply submit the order to the database
       await this.submitOrder(orderData);
+      
+      console.log('Order processed successfully');
     } catch (error) {
       console.error('Order processing error:', error);
       throw error instanceof ApiError 
         ? error 
         : new ApiError('Failed to process order');
     }
-  }
-
-  async sendOrderConfirmation(orderData: OrderData): Promise<DirectusResponse<void>> {
-    return this.request<void>('/email/send', {
-      method: 'POST',
-      body: JSON.stringify({
-        to: orderData.email,
-        subject: 'Confirmação de Encomenda',
-        template: 'order-confirmation',
-        data: {
-          orderData,
-          date: new Date().toLocaleDateString('pt-PT'),
-          time: new Date().toLocaleTimeString('pt-PT')
-        }
-      }),
-    });
   }
 }
 

@@ -10,7 +10,7 @@ interface QuantityControlProps {
   isDisabled: boolean;
 }
 
-const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
+const OrderForm: React.FC<OrderFormProps> = ({ onSubmit, onReturnToContact }) => {
   // Use the products hook instead of direct imports
   const { products: packs, extras, loading, error } = useProducts();
 
@@ -198,7 +198,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
           // Fechar o toast automaticamente após 5 segundos
           setTimeout(() => {
             setShowOfferToast(false);
-          }, 5000);
+          }, 8000);
         }
       }
       return newExtras;
@@ -284,6 +284,21 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
       setIsSubmitting(false);
     }
   };
+  
+  // Handler for the OK button in success message
+  const handleSuccessOk = () => {
+    setSuccessMessage(null);
+    
+    // Reset form to initial state
+    setSelectedPacks(new Map());
+    setSelectedExtras(new Map());
+    setObservation("");
+    
+    // Navigate back to contact form if callback exists
+    if (onReturnToContact) {
+      onReturnToContact();
+    }
+  };
 
   return (
     <div className="min-vh-100 bg-light d-flex align-items-center py-4">
@@ -295,11 +310,6 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
             </h3>
             <h5 className="text-center mb-4">Sessão fotográfica escolar</h5>
 
-            {successMessage && (
-              <div className="alert alert-success mb-4" role="alert">
-                {successMessage}
-              </div>
-            )}
 
             {/* Pack Information Modal */}
             <div
@@ -314,7 +324,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
             >
               <div className="modal-dialog">
                 <div className="modal-content">
-                  <div className="modal-header bg-primary text-white text-uppercase">
+                  <div className="modal-header bg-warning text-white text-uppercase">
                     <h5 className="modal-title">Informação Importante</h5>
                     <button
                       type="button"
@@ -342,7 +352,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
                   <div className="modal-footer">
                     <button
                       type="button"
-                      className="btn btn-primary"
+                      className="btn btn-warning text-white"
                       onClick={() => setShowPackModal(false)}
                     >
                       Entendi
@@ -717,14 +727,14 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
             aria-live="assertive"
             aria-atomic="true"
             style={{ 
-              minWidth: "350px", 
+              minWidth: "450px", 
               backgroundColor: "rgba(255, 255, 255, 0.95)",
               border: "2px solid #28a745"
             }}
           >
             <div className="toast-header bg-success text-white">
-              <i className="bi bi-gift me-2 fs-5"></i>
-              <strong className="me-auto fs-5">Oferta Especial!</strong>
+              <i className="bi bi-gift me-4 fs-5"></i>
+              <strong className="me-auto fs-5">Oferta!</strong>
               <button
                 type="button"
                 className="btn-close btn-close-white"
@@ -732,34 +742,45 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
               />
             </div>
             <div className="toast-body p-3 bg-white">
-              <p className="mb-1 fs-5 text-dark"><strong>Parabéns!</strong> Uma unidade do extra de menor valor é <strong className="text-success">gratuita</strong>!</p>
+              <p className="mb-1 fs-5 text-dark"><strong></strong> Uma unidade do extra de menor valor é <strong className="text-success">gratuita</strong>!</p>
               <p className="text-dark mb-0">O desconto já foi aplicado ao seu pedido.</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Success Toast */}
+      {/* Order confirmation - Updated with handleSuccessOk */}
       {successMessage && (
         <div
-          className="position-fixed top-0 end-0 p-3"
-          style={{ zIndex: 1070 }}
+          className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+          style={{ 
+            zIndex: 1080,
+            backgroundColor: "rgba(0,0,0,0.7)" 
+          }}
         >
           <div
-            className="toast show"
-            role="alert"
-            aria-live="assertive"
-            aria-atomic="true"
+            className="card shadow-lg border-0"
+            style={{ 
+              maxWidth: "500px",
+              width: "90%",
+              backgroundColor: "#fff" 
+            }}
           >
-            <div className="toast-header bg-success text-white">
-              <strong className="me-auto">Sucesso!</strong>
-              <button
-                type="button"
-                className="btn-close btn-close-white"
-                onClick={() => setSuccessMessage(null)}
-              />
+            <div className="card-header bg-primary text-white py-3">
+              <div className="d-flex align-items-center">
+                <i className="bi bi-check-circle-fill fs-3 me-3"></i>
+                <h5 className="mb-0 fw-bold fs-4">Sucesso!</h5>
+              </div>
             </div>
-            <div className="toast-body">{successMessage}</div>
+            <div className="card-body p-4 text-center">
+              <p className="fs-5 mb-4">{successMessage}</p>
+              <button 
+                className="btn btn-primary px-4 py-2" 
+                onClick={handleSuccessOk}
+              >
+                OK
+              </button>
+            </div>
           </div>
         </div>
       )}

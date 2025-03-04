@@ -44,28 +44,28 @@
 </head>
 <body>
   <div class="header">
-    <h1>Order Confirmation</h1>
-    <p>Order Date: {{date}} - {{time}}</p>
+    <h1>Confirmação de Encomenda</h1>
+    <p>Data: {{date}} - {{time}}</p>
   </div>
   
   <div class="content">
     <div class="section">
-      <h2>Contact Information</h2>
-      <p><strong>Name:</strong> {{orderData.name_ed}}</p>
+      <h2>Informações de Contacto</h2>
+      <p><strong>Nome:</strong> {{orderData.name_ed}}</p>
       <p><strong>Email:</strong> {{orderData.email}}</p>
     </div>
 
     <div class="section">
-      <h2>Student Information</h2>
-      <p><strong>Student Name:</strong> {{orderData.name_stu}}</p>
-      <p><strong>School:</strong> {{orderData.school}}</p>
-      <p><strong>Class:</strong> {{orderData.class}}</p>
+      <h2>Informações do Aluno</h2>
+      <p><strong>Nome do Aluno:</strong> {{orderData.name_stu}}</p>
+      <p><strong>Escola:</strong> {{orderData.school}}</p>
+      <p><strong>Turma:</strong> {{orderData.class}}</p>
     </div>
 
     <div class="section">
-      <h2>Order Details</h2>
+      <h2>Detalhes da Encomenda</h2>
       {{#if orderData.packs.length}}
-      <h3>Selected Packs</h3>
+      <h3>Packs Selecionados</h3>
       <ul>
         {{#each orderData.packs}}
         <li>{{this}}</li>
@@ -74,7 +74,7 @@
       {{/if}}
 
       {{#if orderData.extras.length}}
-      <h3>Selected Extras</h3>
+      <h3>Extras Selecionados</h3>
       <ul>
         {{#each orderData.extras}}
         <li>{{this}}</li>
@@ -83,19 +83,20 @@
       {{/if}}
 
       {{#if orderData.observation}}
-      <h3>Additional Notes</h3>
+      <h3>Observações Adicionais</h3>
       <p>{{orderData.observation}}</p>
       {{/if}}
     </div>
 
     <div class="total">
-      <h2>Total Order Value: ${{orderData.totalCost}}</h2>
+      <h2>Valor Total da Encomenda: {{orderData.totalCost}}</h2>
     </div>
   </div>
 
   <div class="footer">
-    <p>Thank you for your order!</p>
-    <p>If you have any questions, please contact our support team.</p>
+    <p>Obrigado pela sua encomenda!</p>
+    <p>Se tiver alguma questão, por favor contacte a nossa equipa de suporte através de fcpro.pbl@gmail.com ou telefone 932595411.</p>
+    <p>&copy; FCPro Fotografia Profissional</p>
   </div>
 </body>
 </html>

@@ -1,5 +1,10 @@
 // types/models.ts
 
+export interface OrderFormProps {
+  onSubmit: (data: OrderFormData) => Promise<void>;
+  onReturnToContact?: () => void; // Add this new prop
+}
+
 export interface ContactFormData {
   name_ed: string;
   email: string;
