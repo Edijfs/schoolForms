@@ -12,7 +12,6 @@ interface QuantityControlProps {
 
 const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
   // Use the products hook instead of direct imports
-
   const { products: packs, extras, loading, error } = useProducts();
 
   const [selectedPacks, setSelectedPacks] = useState<Map<string, number>>(
@@ -26,6 +25,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showSuccessScreen, setShowSuccessScreen] = useState<boolean>(false);
 
   const [showPackModal, setShowPackModal] = useState(false);
 
@@ -245,10 +245,18 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
     try {
       await onSubmit(orderData);
       setShowSummaryModal(false);
-      setSuccessMessage("Encomenda submetida com sucesso!");
+      setSuccessMessage("Encomenda confirmada");
+      setShowSuccessScreen(true);
       setSelectedPacks(new Map());
       setSelectedExtras(new Map());
       setObservation("");
+      
+      // Keep the toast message visible for 10 seconds before automatically closing it
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 10000);
+      
+      // But keep the full screen message until user action
     } catch (error: unknown) {
       console.error("Submit Error:", error);
       const errorMessage =
@@ -679,28 +687,37 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit }) => {
           </div>
         </div>
       </div>
-
-      {/* Success Toast */}
-      {successMessage && (
-        <div
-          className="position-fixed top-0 end-0 p-3"
-          style={{ zIndex: 1070 }}
-        >
-          <div
-            className="toast show"
-            role="alert"
-            aria-live="assertive"
-            aria-atomic="true"
-          >
-            <div className="toast-header bg-success text-white">
-              <strong className="me-auto">Sucesso!</strong>
-              <button
-                type="button"
-                className="btn-close btn-close-white"
-                onClick={() => setSuccessMessage(null)}
-              />
+      
+      {/* Full Screen Success Message - Centered with improved styling */}
+      {showSuccessScreen && (
+        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" 
+             style={{ zIndex: 1060, backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="text-center p-5 rounded shadow-lg bg-white" 
+               style={{ 
+                 maxWidth: '500px', 
+                 width: '90%',
+                 position: 'absolute',
+                 left: '50%',
+                 top: '50%',
+                 transform: 'translate(-50%, -50%)',
+                 boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
+               }}>
+            <div className="mb-4">
+              <i className="bi bi-check-circle-fill text-success" style={{ fontSize: '5rem' }}></i>
             </div>
-            <div className="toast-body">{successMessage}</div>
+            <h2 className="mb-3 fw-bold">Encomenda confirmada</h2>
+            <p className="text-muted mb-4 fs-5">A sua encomenda foi validada com sucesso</p>
+            <button
+              className="btn btn-primary btn-lg px-4 py-2"
+              onClick={() => {
+                setShowSuccessScreen(false);
+                setSuccessMessage(null);
+                // Optionally reload the page or navigate to a new page
+                // window.location.reload();
+              }}
+            >
+              Fechar
+            </button>
           </div>
         </div>
       )}

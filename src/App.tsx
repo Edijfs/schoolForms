@@ -58,8 +58,15 @@ export default function App() {
     
     try {
       await apiService.processOrder(finalData);
-      setOrderData({});
-      setCurrentForm('contact');
+
+      // Don't immediately reset the form state to allow the success message to display
+      // The form will be reset when the user closes the success message or navigates away
+      
+      // Delayed reset (optional)
+      setTimeout(() => {
+         setOrderData({});
+         setCurrentForm('contact');
+       }, 10000);
     } catch (error: unknown) {
       console.error('Process Order Error:', error);
       if (error instanceof Error) {
