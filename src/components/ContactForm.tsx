@@ -1,6 +1,7 @@
 // ContactForm.tsx
 import React, { useState } from "react";
 import { useSchool } from "../components/SchoolContext";
+import BrandedFormWrapper from "./BrandedFormWrapper";
 
 interface ContactFormProps {
   onSubmit: (data: { name_ed: string; email: string }) => void;
@@ -62,22 +63,23 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
   };
 
   return (
-    <div className="min-vh-100 bg-light d-flex align-items-center py-5">
+    <div className="d-flex align-items-center py-3">
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-12 col-md-6">
             {/* School Name Header */}
             {schoolName && (
-              <h2 className="text-center mb-4 text-primary fw-bold">
+              <h2 className="text-center mb-3 text-primary fs-1">
                 A minha escola - {decodeURIComponent(schoolName)}
               </h2>
             )}
 
             {/* Main Form */}
-            <form onSubmit={handleSubmit} className="card shadow-sm">
-              <div className="card-body p-4">
-                <h3 className="text-center mb-4">Informações do encarregado de educação</h3>
-
+            <form onSubmit={handleSubmit}>
+              <BrandedFormWrapper 
+                title="Informações do encarregado de educação"
+                subtitle="Preencha os dados"
+              >
                 {/* Name Field */}
                 <div className="mb-3">
                   <label htmlFor="name_ed" className="form-label">
@@ -147,7 +149,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
                 <button type="submit" className="btn btn-primary w-100">
                   Avançar
                 </button>
-              </div>
+              </BrandedFormWrapper>
             </form>
           </div>
         </div>
@@ -166,11 +168,11 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
       >
         <div className="modal-dialog modal-lg">
           <div className="modal-content">
-            <div className="modal-header">
+            <div className="modal-header bg-primary text-white">
               <h5 className="modal-title">Termos e condições</h5>
               <button
                 type="button"
-                className="btn-close"
+                className="btn-close btn-close-white"
                 onClick={handleCloseModal}
                 aria-label="Close"
               />
@@ -209,6 +211,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
                   fcpro.pbl@gmail.com para efetuar alterações ou cancelamentos do seu pedido.
                 </p>
 
+      
               </div>
             </div>
             <div className="modal-footer">

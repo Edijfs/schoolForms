@@ -45,13 +45,13 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
   };
 
   return (
-    <div className="min-vh-100 bg-light d-flex align-items-center py-5">
+    <div className="d-flex align-items-center py-3">
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-12 col-md-6">
             <form onSubmit={handleSubmit} className="card shadow-sm">
               <div className="card-body p-4">
-                <h3 className="text-center mb-4">Informações do estudante</h3>
+                <h3 className="text-center fs-5 mb-4">Informações do estudante</h3>
 
                 {/* Student Name Field */}
                 <div className="mb-4">
@@ -84,7 +84,7 @@ const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
                     required
                   >
                     <option value="">Selecione o ano</option>
-                    {["Créche","Pré-escolar","1º", "2º", "3º", "4º", "5º", 
+                    {["Creche","Pré-escolar","1º", "2º", "3º", "4º", "5º", 
                     "6º", "7º", "8º", "9º", "10º", "11º", "12º"].map((year) => (
                       <option key={year} value={year}>
                         {year}

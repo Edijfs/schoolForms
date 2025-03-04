@@ -1,0 +1,34 @@
+/* Create a new file: styles/forms.css */
+
+/* Adjust vertical spacing for all form containers */
+.form-container > div {
+    padding-top: 0.5rem !important;
+    padding-bottom: 1rem !important;
+    min-height: auto !important;
+  }
+  
+  /* Ensure cards don't have excessive padding */
+  .card-body {
+    padding: 1.5rem !important;
+  }
+  
+  /* Make progress bar more compact */
+  .progress-container {
+    margin-bottom: 3rem !important;
+  }
+  
+  /* Adjust spacing in the OrderForm component */
+  .row.g-3 {
+    margin-top: 3rem !important;
+    margin-bottom: 3rem !important;
+  }
+  
+  /* Reduce spacing in headings */
+  h5.mb-4 {
+    margin-bottom: 1rem !important;
+  }
+  
+  /* Adjust vertical spacing for all forms */
+  .min-vh-100 {
+    min-height: auto !important;
+  }

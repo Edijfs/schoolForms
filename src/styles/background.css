@@ -1,0 +1,24 @@
+/* background.css */
+.bg-image {
+    background-image: url('\public\images\Background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    position: relative;
+  }
+  
+  .bg-overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(255, 255, 255, 0.5)/* White with 85% opacity */
+  }
+  
+  .content-container {
+    position: relative;
+    z-index: 1;
+    padding: 2rem 0;
+  }

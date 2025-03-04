@@ -1,0 +1,122 @@
+/* styles/brand.css */
+
+/* Brand colors - adjust these to match your brand */
+:root {
+    --brand-primary: #007bff;   /* Adjust to your brand primary color */
+    --brand-secondary: #6c757d; /* Adjust to your brand secondary color */
+    --brand-accent: #28a745;    /* Adjust to your brand accent color */
+  }
+  
+  /* Card styling with brand elements */
+  .card {
+    border-radius: 8px;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-body {
+    position: relative;
+  }
+  
+  /* Add subtle brand watermark to card backgrounds */
+  .card-body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 150px;
+    height: 150px;
+    background-image: url('/images/fcpro-watermark.png');
+    background-repeat: no-repeat;
+    background-position: top right;
+    background-size: contain;
+    opacity: 0.05;
+    pointer-events: none;
+  }
+  
+  /* Brand header styles */
+  .brand-header {
+    padding: 1rem 0;
+  }
+  
+  .brand-logo {
+    transition: transform 0.3s ease;
+  }
+  
+  .brand-logo:hover {
+    transform: scale(1.05);
+  }
+  
+  .brand-tagline {
+    font-style: italic;
+  }
+  
+  /* Form styling with brand elements */
+  .form-control:focus, 
+  .form-select:focus {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+  }
+  
+  /* Brand buttons */
+  .btn-primary {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+  }
+  
+  .btn-primary:hover {
+    background-color: #0069d9;
+    border-color: #0062cc;
+  }
+  
+  /* Footer styling */
+  .brand-footer {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Brand accent text */
+  .text-brand {
+    color: var(--brand-primary) !important;
+  }
+  
+  /* Brand border accent */
+  .border-brand {
+    border-color: var(--brand-primary) !important;
+  }
+  
+  /* Add a branded section divider */
+  .brand-divider {
+    position: relative;
+    text-align: center;
+    margin: 1.5rem 0;
+  }
+  
+  .brand-divider::before {
+    content: "";
+    display: block;
+    height: 1px;
+    width: 100%;
+    background: #e0e0e0;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  .brand-divider span {
+    background: white;
+    padding: 0 1rem;
+    position: relative;
+    display: inline-block;
+    color: var(--brand-secondary);
+    font-size: 0.875rem;
+  }
+  
+  /* Brand pill badges */
+  .badge-brand {
+    background-color: var(--brand-primary);
+    color: white;
+    font-weight: 500;
+    border-radius: 50rem;
+  }
