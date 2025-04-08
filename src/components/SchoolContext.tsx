@@ -1,29 +1,26 @@
 // components/SchoolContext.tsx
-import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { SchoolContextType } from '../types/models';
 
-// Create a context with a default value
 const SchoolContext = createContext<SchoolContextType>({
   schoolName: null
 });
 
-// Create a provider component
-export const SchoolProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+interface SchoolProviderProps {
+  children: ReactNode;
+}
+
+export const SchoolProvider: React.FC<SchoolProviderProps> = ({ children }) => {
   const [schoolName, setSchoolName] = useState<string | null>(null);
 
   useEffect(() => {
-    // Parse the URL to extract the school parameter (case-insensitive)
+    // Extract school name from URL parameters when component mounts
     const params = new URLSearchParams(window.location.search);
-    // Check for both 'school' and 'School' to handle case sensitivity
-    const school = params.get('school') || params.get('School');
+    // Check for both uppercase and lowercase versions of the parameter
+    const school = params.get('School') || params.get('school');
     
-    // Set the school name state
     if (school) {
-      // Store the raw value, we'll decode it when displaying
-      setSchoolName(school);
-      
-      // Also store it in localStorage for persistence across the app
-      localStorage.setItem('schoolName', school);
+      setSchoolName(decodeURIComponent(school));
     }
   }, []);
 
@@ -34,5 +31,4 @@ export const SchoolProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   );
 };
 
-// Custom hook for using the context
 export const useSchool = () => useContext(SchoolContext);

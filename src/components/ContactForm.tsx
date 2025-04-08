@@ -70,7 +70,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
             {/* School Name Header */}
             {schoolName && (
               <h2 className="text-center mb-3 text-primary fs-1">
-                A minha escola - {decodeURIComponent(schoolName)}
+                {decodeURIComponent(schoolName)}
               </h2>
             )}
 
@@ -187,8 +187,8 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
 
                 <h6>2. Processamento do Pedido</h6>
                 <p>
-                  Os pedidos serão dados como processados após efetuar o pagamento na sua escola.
                   Receberá uma confirmação por email com os detalhes do seu pedido.
+                  Os pedidos serão dados como processados após efetuar o pagamento na sua escola.
                   Os pedidos realizados após o termino da data indicada, não seram processados.
                 </p>
 
@@ -210,8 +210,6 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
                   Por favor, entre em contato com a Fcpro através do nºtel: 932595411, ou email 
                   fcpro.pbl@gmail.com para efetuar alterações ou cancelamentos do seu pedido.
                 </p>
-
-      
               </div>
             </div>
             <div className="modal-footer">

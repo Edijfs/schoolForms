@@ -1,5 +1,4 @@
-// App.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ContactForm from './components/ContactForm';
 import StudentForm from './components/StudentForm';
 import OrderForm from './components/OrderForm';
@@ -16,25 +15,31 @@ import './styles/forms.css';
 export default function App() {
   const [currentForm, setCurrentForm] = useState<'contact' | 'student' | 'order'>('contact');
   const [orderData, setOrderData] = useState<Partial<OrderData>>({});
+  const [schoolName, setSchoolName] = useState<string>('Unknown School');
+  
+  // Extract school name from URL on component mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    // Check for both uppercase and lowercase versions of the parameter
+    const school = params.get('School') || params.get('school') || 'Unknown School';
+    setSchoolName(decodeURIComponent(school));
+  }, []);
 
   const handleContactSubmit = (data: ContactFormData) => {
     setOrderData(prev => ({ 
       ...prev,
       nome_ed: data.name_ed,   
-      email: data.email
+      email: data.email,
+      escola: schoolName // Set school name here
     }));
     setCurrentForm('student');
   };
   
   const handleStudentSubmit = (data: StudentFormData) => {
-    const params = new URLSearchParams(window.location.search);
-    const school = params.get('school') || 'Unknown School';
-    
     setOrderData(prev => ({ 
       ...prev,
       nome_stu: data.name_stu,  
-      turma: data.turma,        
-      escola: school            
+      turma: data.turma        
     }));
     setCurrentForm('order');
   };
@@ -46,7 +51,7 @@ export default function App() {
       nome_ed: orderData.nome_ed || '',
       email: orderData.email || '',
       nome_stu: orderData.nome_stu || '',
-      escola: orderData.escola || '',
+      escola: orderData.escola || schoolName, // Use the schoolName if not set earlier
       turma: orderData.turma || '',
       packs: formData.packs,
       extras: formData.extras,
@@ -90,6 +95,13 @@ export default function App() {
         <div className="container py-3">
           {/* Brand Header */}
           <BrandHeader />
+          
+          {/* Display School Name */}
+          {schoolName && schoolName !== 'Unknown School' && (
+            <div className="text-center mb-3">
+              <h2 className="text-primary">Escola: {schoolName}</h2>
+            </div>
+          )}
           
           {/* Progress Indicator */}
           <div className="progress-container mb-3">
