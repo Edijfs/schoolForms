@@ -271,7 +271,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit, onReturnToContact }) =>
     try {
       await onSubmit(orderData);
       setShowSummaryModal(false);
-      setSuccessMessage("Encomenda submetida com sucesso!");
+      setSuccessMessage("Encomenda submetida com sucesso! Foi enviado um resumo da sua encomenda para sua caixa de email.");
       setSelectedPacks(new Map());
       setSelectedExtras(new Map());
       setObservation("");
