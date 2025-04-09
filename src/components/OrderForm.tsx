@@ -336,7 +336,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit, onReturnToContact }) =>
                   <div className="modal-body">
                     <p>
                       Ao selecionar o Pack Irmãos, certifique-se de incluir as
-                      seguintes informações dos irmãos nas observaçoes: Nome
+                      seguintes informações dos irmãos nas observações: Nome
                       completo, turma/ano
                     </p>
                     <p className="mb-0 text-info">
@@ -419,8 +419,12 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit, onReturnToContact }) =>
 
             {/* Extras Selection */}
             <div className="mb-4 text-center">
-              <h5 className="bg-success text-white px-3 py-1 rounded">EXTRAS
+            <h5 className="bg-success text-white px-3 py-1 rounded">EXTRAS
               </h5>
+              <p className="fs-5 fw-bold text-success mt-2 mb-3">
+                <i className="bi bi-info-circle me-1"></i>
+                Selecione 3 ou mais extras e receba 1 unidade do extra de menor valor de oferta
+              </p>
               <div className="row g-3">
                 {/* Show offer message when total quantity > 2 */}
                 {Array.from(selectedExtras.values()).reduce(

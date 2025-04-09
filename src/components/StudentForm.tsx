@@ -12,10 +12,8 @@ interface StudentFormProps {
 const StudentForm: React.FC<StudentFormProps> = ({ onSubmit }) => {
   // Predefined list of classes
   const turmaOptions = [
-    'Sala Amarela',
-    'Sala Azul',
-    'Sala Verde',
-    'Sala Vermelha',
+    'Sala Amarela', 'Sala Azul', 'Sala Verde', 'Sala Lilás', 'Sala Arcoiris', 'Sala Dourada', 
+    'Sala Rosa', 'Sala Verde', 'Sala Sala Laranja', 'Sala Mickey', 'Sala Berçario', 'ATL', 'Sala Piu-Piu',
     'A','B','C','D','E', 'F','G','H'
   ];
 
