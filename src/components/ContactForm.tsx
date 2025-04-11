@@ -1,6 +1,5 @@
 // ContactForm.tsx
 import React, { useState } from "react";
-import { useSchool } from "../components/SchoolContext";
 import BrandedFormWrapper from "./BrandedFormWrapper";
 
 interface ContactFormProps {
@@ -13,7 +12,6 @@ interface FormData {
 }
 
 const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
-  const { schoolName } = useSchool();
   const [formData, setFormData] = useState<FormData>({
     name_ed: "",
     email: "",
@@ -67,13 +65,6 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-12 col-md-6">
-            {/* School Name Header */}
-            {schoolName && (
-              <h2 className="text-center mb-3 text-primary fs-1">
-                {decodeURIComponent(schoolName)}
-              </h2>
-            )}
-
             {/* Main Form */}
             <form onSubmit={handleSubmit}>
               <BrandedFormWrapper 
