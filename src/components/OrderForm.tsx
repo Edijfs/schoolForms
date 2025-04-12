@@ -335,9 +335,10 @@ const OrderForm: React.FC<OrderFormProps> = ({ onSubmit, onReturnToContact }) =>
                   </div>
                   <div className="modal-body">
                     <p>
-                      Ao selecionar o Pack Irmãos, certifique-se de incluir as
-                      seguintes informações dos irmãos nas observações: Nome
-                      completo, turma/ano
+                    Ao selecionar um Pack de Irmãos, certifique-se que faz o 
+                    pedido apenas num dos educandos e faculte as informações 
+                    dos outros irmãos nas observações (Nome completo, turma/ano). 
+                    Obrigado.
                     </p>
                     <p className="mb-0 text-info">
                       <i className="bi bi-exclamation-triangle"></i>
